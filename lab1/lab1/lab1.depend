@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1521456106 source:c:\users\student\documents\jklimek\lab1\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1521456106 
+
+1522513079 source:/home/klimek/Downloads/lab1/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+
