@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1523818442 source:/home/klimek/pk/lab2/lab2/main.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+
