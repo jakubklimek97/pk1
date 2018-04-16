@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1523874873 source:c:\users\student\documents\klimek\jakub-klimek-gr12-repo\lab3\lab3\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+
