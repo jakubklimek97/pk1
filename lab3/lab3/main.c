@@ -39,7 +39,8 @@ int main()
     memmove(czescPoLiczbie+25,czescPoLiczbie+strlen(czescPoLiczbie)-2,3);
     puts(czescPoLiczbie);
 
-
+	free(stringNumeryczny);
+	free(gotowyCiag);
 
 
     return 0;
