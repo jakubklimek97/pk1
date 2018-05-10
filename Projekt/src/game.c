@@ -11,8 +11,12 @@
 
 #include "bool.h"
 #include "defines.h"
+
 #include "mediaLoader.h"
 #include "mediaList.h"
+
+#include "sceneList.h"
+#include "scene.h"
 
 SDL_Window* gWindow = NULL;
 /*SDL_Surface* gScreenSurface = NULL;*/
@@ -66,51 +70,25 @@ int main(){
 			perror("Nie udalo sie zaladowac mediow.\n");
 		}
 		else{
-			bool quit = false;
+			selectScene(MAIN_MENU);
 			SDL_Event e;
 			/*SDL_Surface* curr = getSurface(IMG_HELLOWORD);*/
-			SDL_Texture* currTex = getTexture(IMG_HELLOWORD);
 
-			SDL_Rect stretchRect;
+			/*SDL_Rect stretchRect;
 			stretchRect.x = 200;
 			stretchRect.y = 200;
 			stretchRect.w = 100;
-			stretchRect.h = 70;
+			stretchRect.h = 70;*/
 			/*SDL_UpdateWindowSurface(gWindow);*/
-			while(!quit){
+			while(selectedScene != QUIT){
 				while(SDL_PollEvent(&e) != 0){
-					if(e.type == SDL_QUIT){
-						quit = true;
-					}
-					if(e.type == SDL_KEYDOWN){
-						switch(e.key.keysym.sym){
-						case SDLK_UP:
-							/*curr = getSurface(IMG_UP);*/
-							currTex = getTexture(IMG_UP);
-							break;
-						case SDLK_DOWN:
-							/*curr = getSurface(IMG_DOWN);*/
-							currTex = getTexture(IMG_DOWN);
-							break;
-						case SDLK_LEFT:
-							/*curr = getSurface(IMG_LEFT);*/
-							currTex = getTexture(IMG_LEFT);
-							break;
-						case SDLK_RIGHT:
-							/*curr = getSurface(IMG_RIGHT);*/
-							currTex = getTexture(IMG_RIGHT);
-							break;
-						default:
-							/*curr = getSurface(IMG_HELLOWORD);*/
-							currTex = getTexture(IMG_HELLOWORD);
-							break;
-						}
-					}
+					currScene->handleEvents(&e);
 				}
-				SDL_RenderClear(gRenderer);
+				currScene->renderScene();
+				/*SDL_RenderClear(gRenderer);
 				SDL_RenderCopy(gRenderer,currTex,NULL,NULL);
 				SDL_RenderCopy(gRenderer,currTex,NULL,&stretchRect);
-				SDL_RenderPresent(gRenderer);
+				SDL_RenderPresent(gRenderer);*/
 				/*(SDL_BlitScaled(curr,NULL,gScreenSurface,&stretchRect);
 				SDL_UpdateWindowSurface(gWindow);*/
 			}
