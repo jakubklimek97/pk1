@@ -53,5 +53,5 @@ static void renderScene()
 }
 
 
-struct scene testScene = {&handleEvents, &renderScene};
+struct scene testScene = {&handleEvents, &renderScene, NULL, NULL};
 
