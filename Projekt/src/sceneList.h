@@ -5,8 +5,9 @@
 struct scene;
 enum sceneList{
 	MAIN_MENU,
+	TEST,
 	QUIT
 };
-struct scene* sceneList;
+extern struct scene* sceneList[];
 
 #endif

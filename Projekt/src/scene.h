@@ -15,10 +15,14 @@
 struct scene{
 	void (*handleEvents)(SDL_Event *e);
 	void (*renderScene)();
+	void (*initScene)();
+	void (*destroyScene)();
 };
 enum sceneList selectedScene;
 struct scene* currScene;
 void selectScene(enum sceneList scene);
+void initScenes();
+void destroyScenes();
 
 
 

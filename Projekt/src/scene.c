@@ -9,6 +9,6 @@
 #include "scene.h"
 #include "sceneList.h"
 void selectScene(enum sceneList scene){
-	currScene = &sceneList[scene];
+	currScene = sceneList[scene];
 	selectedScene = scene;
 }

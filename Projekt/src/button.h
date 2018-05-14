@@ -19,11 +19,14 @@ enum buttonState {
 struct button {
 	SDL_Point position;
 	enum buttonState state;
+	int width;
+	int height;
 	struct texture* bTexture[3];
+	void (*pFunction)(void);
 };
-struct button* createButton(int x, int y, enum mediaList defaultTexture,  enum mediaList mouseoverTexture, enum mediaList pressedTexture);
+struct button* createButton(int x, int y, enum mediaList defaultTexture,  enum mediaList mouseoverTexture, enum mediaList pressedTexture, void (*pFunction)());
 void renderButton(struct button* pButton);
-void handeEvent(SDL_Event* e);
-
+void handeEvent(struct button* btn, SDL_Event* e);
+void destroyButton(struct button* pointer);
 
 #endif /* BUTTON_H_ */

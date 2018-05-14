@@ -9,8 +9,10 @@
 #include "scene.h"
 /*extern for every scene */
 struct scene testScene;
+struct scene menuScene;
 /*end extern*/
 
-struct scene* sceneList = {
+struct scene* sceneList[] = {
+		&menuScene,
 		&testScene
 };
