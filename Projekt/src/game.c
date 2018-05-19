@@ -40,15 +40,23 @@ bool inicjalizacja(){
 				printf("SDL_image nie mogl zostac zinicjalizowany: %s\n", IMG_GetError());
 				czySukces = false;
 			}
-			/*gScreenSurface = SDL_GetWindowSurface(gWindow);*/
-			gRenderer = SDL_CreateRenderer(gWindow,-1,SDL_RENDERER_ACCELERATED);
-			if(gRenderer == NULL){
-				printf("Renderer nie mogl zostac utworzony: %s\n", SDL_GetError());
-				czySukces = false;
-			}
 			else{
-				SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+				if(TTF_Init() == -1){
+					printf("SDL_ttf nie mogl zostac zinicjalizowany: %s\n", TTF_GetError());
+				}
+				else{
+					gRenderer = SDL_CreateRenderer(gWindow,-1,SDL_RENDERER_ACCELERATED);
+					if(gRenderer == NULL){
+						printf("Renderer nie mogl zostac utworzony: %s\n", SDL_GetError());
+						czySukces = false;
+					}
+					else{
+						SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+					}
+				}
 			}
+			/*gScreenSurface = SDL_GetWindowSurface(gWindow);*/
+
 		}
 	}
 
@@ -58,6 +66,8 @@ void zamknij(){
 	unloadMedia();
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
+	TTF_Quit();
+	IMG_Quit();
 	SDL_Quit();
 }
 

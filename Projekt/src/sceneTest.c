@@ -14,6 +14,7 @@
 extern SDL_Renderer* gRenderer;
 SDL_Texture* currTex = NULL;
 bool quit = false;
+bool changeScene = false;
 
 static void handleEvents(SDL_Event *e){
 	if(e->type == SDL_QUIT){
@@ -32,6 +33,7 @@ static void handleEvents(SDL_Event *e){
 					break;
 				case SDLK_RIGHT:
 					currTex = getTexture(IMG_RIGHT);
+					selectScene(MAIN_MENU);
 					break;
 				default:
 					currTex = getTexture(IMG_HELLOWORD);

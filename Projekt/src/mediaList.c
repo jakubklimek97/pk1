@@ -14,4 +14,5 @@ char* mediaLocations[]={
 			"media/img/menuBg.png",
 			"media/img/menu_btn_single_default.png",
 			"media/img/menu_btn_single_mouseover.png",
+			"media/fonts/OpenSans-Bold.ttf"
 	};

@@ -7,6 +7,9 @@
 
 #include "mediaLoader.h"
 #include "mediaList.h"
+
+#define FONT_SIZE 28
+
 /*xtern SDL_Surface* gScreenSurface;*/
 extern SDL_Renderer* gRenderer;
 bool loadMedia(){
@@ -47,6 +50,15 @@ bool loadMedia(){
 			SDL_FreeSurface(pTmpSur);
 			++currMedia;
 		}
+		pFonts = malloc(FONT_COUNT*sizeof(TTF_Font*));
+		while(currMedia-MEDIA_COUNT < FONT_COUNT){
+			pFonts[currMedia-MEDIA_COUNT] = TTF_OpenFont(mediaLocations[currMedia],FONT_SIZE);
+			if(pFonts[currMedia-MEDIA_COUNT] == NULL){
+				printf("Nie mozna zaladowac czcionki %s %s\n", mediaLocations[currMedia],TTF_GetError());
+				success = false;
+			}
+			++currMedia;
+		}
 	}
 	return success;
 }
@@ -55,6 +67,9 @@ bool loadMedia(){
 }*/
 SDL_Texture* getTexture(int mediaNumber){
 	return pTexture[mediaNumber]->lTexture;
+}
+TTF_Font* getFont(int fontNumber){
+	return pFonts[fontNumber];
 }
 void unloadMedia(){
 	int currMedia = 0;
@@ -65,6 +80,11 @@ void unloadMedia(){
 		free(pTexture[currMedia]);
 		currMedia++;
 	}
+	while(currMedia-MEDIA_COUNT < FONT_COUNT){
+		TTF_CloseFont(pFonts[currMedia-MEDIA_COUNT]);
+		currMedia++;
+	}
+	free(pFonts);
 	/*free(pSurfaces);*/
 	free(pTextures);
 	free(pTexture);

@@ -16,23 +16,33 @@
 
 extern SDL_Renderer* gRenderer;
 static  SDL_Texture* currTex = NULL;
-static bool quit = false;
+static bool* quit = false;
 static bool wasInitiated = false;
 static struct button** pBtns = NULL;
 
 static int btnCount = 2;
 /*button functions*/
 static void quitBtnClicked(){
-	quit = true;
+	selectScene(TEST);
 }
 /*end of button functions*/
 
 static void init(){
+	quit = malloc(sizeof(bool));
+	*quit = false;
 	pBtns = malloc(btnCount*sizeof(struct button*));
 	pBtns[0] = createButton(300,100,IMG_MENU_BTN_DEFAULT, IMG_MENU_BTN_MOUSEOVER,IMG_MENU_BTN_MOUSEOVER, NULL);
 	pBtns[1] = createButton(300,300,IMG_MENU_BTN_DEFAULT, IMG_MENU_BTN_MOUSEOVER,IMG_MENU_BTN_MOUSEOVER, &quitBtnClicked);
+	wasInitiated = true;
 }
-
+static void unInit(){
+	wasInitiated = false;
+	free(quit);
+	int i;
+	for(i=0; i < btnCount; ++i){
+		destroyButton(pBtns[i]);
+	}
+}
 
 
 static void handleEvents(SDL_Event *e){
@@ -41,7 +51,7 @@ static void handleEvents(SDL_Event *e){
 		init();
 	}
 	if(e->type == SDL_QUIT){
-		quit = true;
+		*quit = true;
 		return;
 	}
 	/*if(e->type == SDL_KEYDOWN){
@@ -69,8 +79,9 @@ static void handleEvents(SDL_Event *e){
 }
 static void renderScene()
 {
-	if(quit == true){
+	if(*quit == true){
 		selectScene(QUIT);
+		return;
 	}
 	if(currTex == NULL){
 		currTex = getTexture(IMG_MENU_BG);
@@ -85,5 +96,5 @@ static void renderScene()
 }
 
 
-struct scene menuScene = {&handleEvents, &renderScene};
+struct scene menuScene = {&handleEvents, &renderScene, &init, &unInit};
 

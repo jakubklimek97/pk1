@@ -19,6 +19,10 @@
 		IMG_MENU_BTN_MOUSEOVER,
 		MEDIA_COUNT
 	};
+	enum fontList{
+		FONT_OPENSANS_BOLD,
+		FONT_COUNT
+	};
 	extern char* mediaLocations[];
 
 
