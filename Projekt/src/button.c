@@ -26,7 +26,8 @@ void destroyButton(struct button* pointer){
 	}
 }
 void renderButton(struct button* pButton){
-	renderTexture(pButton->bTexture[pButton->state], pButton->position.x, pButton->position.y);
+	if(pButton)
+		renderTexture(pButton->bTexture[pButton->state], pButton->position.x, pButton->position.y);
 }
 void handeEvent(struct button* btn, SDL_Event* e){
 	if(e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONUP || e->type == SDL_MOUSEBUTTONDOWN){

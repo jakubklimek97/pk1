@@ -10,6 +10,7 @@
 #include "bool.h"
 #include "mediaLoader.h"
 #include "mediaList.h"
+#include <string.h>
 
 extern SDL_Renderer* gRenderer;
 SDL_Texture* currTex = NULL;

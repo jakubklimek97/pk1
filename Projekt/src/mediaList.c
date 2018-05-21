@@ -14,5 +14,12 @@ char* mediaLocations[]={
 			"media/img/menuBg.png",
 			"media/img/menu_btn_single_default.png",
 			"media/img/menu_btn_single_mouseover.png",
+			"media/img/scene_menu/menu_bg_static.png",
+			"media/img/scene_menu/menu_btn_singlegame_default.png",
+			"media/img/scene_menu/menu_btn_singlegame_mouseover.png",
+			"media/img/scene_menu/menu_btn_multiplayer_default.png",
+			"media/img/scene_menu/menu_btn_multiplayer_mouseover.png",
+			"media/img/scene_menu/menu_btn_quitgame_default.png",
+			"media/img/scene_menu/menu_btn_quitgame_mouseover.png",
 			"media/fonts/OpenSans-Bold.ttf"
 	};

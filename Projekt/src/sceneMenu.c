@@ -4,35 +4,37 @@
  *  Created on: 10 maj 2018
  *      Author: klimek
  */
-#include <SDL2/SDL.h>
+#include "sceneMenu.h"
 #include <string.h>
-#include "scene.h"
-#include "sceneList.h"
-#include "bool.h"
-#include "mediaLoader.h"
-#include "mediaList.h"
-#include "button.h"
-
 
 extern SDL_Renderer* gRenderer;
 static  SDL_Texture* currTex = NULL;
-static bool* quit = false;
+static bool* quit;
 static bool wasInitiated = false;
 static struct button** pBtns = NULL;
 
-static int btnCount = 2;
+static int btnCount = 3;
 /*button functions*/
 static void quitBtnClicked(){
-	selectScene(TEST);
+	selectScene(QUIT);
+}
+static void singleBtnClicked(){
+
+}
+static void multiBtnClicked(){
+
 }
 /*end of button functions*/
+
+#define IMG_BACKGROUND IMG_SCENE_MENU_BG_STATIC
 
 static void init(){
 	quit = malloc(sizeof(bool));
 	*quit = false;
 	pBtns = malloc(btnCount*sizeof(struct button*));
-	pBtns[0] = createButton(300,100,IMG_MENU_BTN_DEFAULT, IMG_MENU_BTN_MOUSEOVER,IMG_MENU_BTN_MOUSEOVER, NULL);
-	pBtns[1] = createButton(300,300,IMG_MENU_BTN_DEFAULT, IMG_MENU_BTN_MOUSEOVER,IMG_MENU_BTN_MOUSEOVER, &quitBtnClicked);
+	pBtns[0] = createButton(250,125,IMG_SCENE_MENU_BTN_SINGLEGAME_DEFAULT, IMG_SCENE_MENU_BTN_SINGLEGAME_MOUSEOVER,IMG_SCENE_MENU_BTN_SINGLEGAME_MOUSEOVER, &singleBtnClicked);
+	pBtns[1] = createButton(250,280,IMG_SCENE_MENU_BTN_MULTIPLAYER_DEFAULT, IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER,IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER, &multiBtnClicked);
+	pBtns[2] = createButton(250,435,IMG_SCENE_MENU_BTN_QUITGAME_DEFAULT, IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER,IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER, &quitBtnClicked);
 	wasInitiated = true;
 }
 static void unInit(){
@@ -42,6 +44,7 @@ static void unInit(){
 	for(i=0; i < btnCount; ++i){
 		destroyButton(pBtns[i]);
 	}
+	free(pBtns);
 }
 
 
@@ -73,7 +76,7 @@ static void handleEvents(SDL_Event *e){
 					break;
 		}*/
 	int processedButton;
-	for(processedButton = 0; processedButton < btnCount; ++processedButton){
+	for(processedButton = 0;selectedScene != QUIT && processedButton < btnCount; ++processedButton){
 		handeEvent(pBtns[processedButton], e);
 	}
 }
@@ -84,7 +87,7 @@ static void renderScene()
 		return;
 	}
 	if(currTex == NULL){
-		currTex = getTexture(IMG_MENU_BG);
+		currTex = getTexture(IMG_BACKGROUND);
 	}
 		SDL_RenderClear(gRenderer);
 		SDL_RenderCopy(gRenderer,currTex,NULL,NULL);

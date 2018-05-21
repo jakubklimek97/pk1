@@ -81,19 +81,16 @@ int main(){
 		}
 		else{
 			selectScene(MAIN_MENU);
-			SDL_Event e;
-			/*SDL_Surface* curr = getSurface(IMG_HELLOWORD);*/
 
-			/*SDL_Rect stretchRect;
-			stretchRect.x = 200;
-			stretchRect.y = 200;
-			stretchRect.w = 100;
-			stretchRect.h = 70;*/
-			/*SDL_UpdateWindowSurface(gWindow);*/
+
+			SDL_Event e;
 			while(selectedScene != QUIT){
 				while(SDL_PollEvent(&e) != 0){
+					if(selectedScene == QUIT) break;
 					currScene->handleEvents(&e);
+
 				}
+				if(selectedScene == QUIT) break;
 				currScene->renderScene();
 				/*SDL_RenderClear(gRenderer);
 				SDL_RenderCopy(gRenderer,currTex,NULL,NULL);
