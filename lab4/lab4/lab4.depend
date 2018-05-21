@@ -1,6 +1,0 @@
-# depslib dependency file v1.0
-1525687027 source:c:\users\student\documents\klimek\repo\lab4\lab4\main.c
-	<stdio.h>
-	<stdlib.h>
-	<string.h>
-
