@@ -12,6 +12,7 @@
 #include "mediaLoader.h"
 #include "mediaList.h"
 #include "button.h"
+#include "inputBox.h"
 #include <SDL2/SDL.h>
 #include "bool.h"
 

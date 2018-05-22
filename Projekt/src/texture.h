@@ -17,5 +17,6 @@ struct texture{
 };
 void renderTexture(struct texture* pTexture, int x, int y);
 bool createFromText(struct texture* pTexture, int fontName, const char* text, SDL_Color textColor);
+void destroyTexture(struct texture* pTexture);
 
 #endif /* TEXTURE_H_ */

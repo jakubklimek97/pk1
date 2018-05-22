@@ -4,12 +4,6 @@
  *  Created on: 21 maj 2018
  *      Author: klimek
  *
- *  TODO:
- *  usun inputBox
- *  aktualizuj teksture inputboxa
- *  renderuj inputBox
- *  dodaj znak do inputBoxa
- *  usun znak z inputBoxa
  */
 
 #ifndef INPUTBOX_H_
@@ -27,26 +21,15 @@ struct inputBox{
 	struct texture* backgroundTexture;
 	bool isVisible;
 	SDL_Point position;
+	enum fontList font;
+	SDL_Color color;
 };
 
-struct inputBox* createInputBox(size_t textFieldSize, int x, int y, bool isVisible, bool addBackground, enum mediaList defaultTexture){
-	struct inputBox* pTmp = malloc(sizeof(struct inputBox));
-	pTmp->updateNeeded = false;
-	pTmp->isVisible = isVisible;
-	pTmp->charsWritten = 0;
-	pTmp->texture = malloc(sizeof(struct texture));
-	pTmp->position.x = x;
-	pTmp->position.y = y;
-	pTmp->textField = malloc(sizeof(char)*textFieldSize);
-	pTmp->textFieldSize = textFieldSize;
-
-	if(addBackground == true){
-		pTmp->backgroundTexture = pTexture[defaultTexture];
-	}
-	else{
-		pTmp->backgroundTexture = NULL;
-	}
-
-	return pTmp;
-}
+struct inputBox* createInputBox(size_t textFieldSize, int x, int y, bool isVisible, enum fontList font,uint8_t r, uint8_t g, uint8_t b, bool addBackground, enum mediaList defaultTexture);
+void destroyInputBox(struct inputBox* pInputBox);
+void inputBoxAppendChar(struct inputBox* pInputBox, char character);
+void inputBoxPopCharacter(struct inputBox* pInputBox);
+void inputBoxRender(struct inputBox* pInputBox);
+void inputBoxToggleVisibility(struct inputBox* pInputBox);
+void inputBoxClearTextField(struct inputBox* pInputBox);
 #endif /* INPUTBOX_H_ */

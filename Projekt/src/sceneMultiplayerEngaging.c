@@ -4,7 +4,7 @@
  *  Created on: 10 maj 2018
  *      Author: klimek
  */
-#include "sceneMenu.h"
+#include "sceneMultiplayerEngaging.h"
 #include <string.h>
 
 extern SDL_Renderer* gRenderer;
@@ -14,22 +14,17 @@ static bool wasInitiated = false;
 static struct button** pBtns = NULL;
 static struct inputBox** pInputBoxes = NULL;
 
-static int btnCount = 3;
-static int inputBoxCount = 0;
+static int btnCount = 1;
+static int inputBoxCount = 1;
 /*button functions*/
-static void quitBtnClicked(){
-	selectScene(QUIT);
+static void clientServerBtnClicked(){
+	inputBoxToggleVisibility(pInputBoxes[0]);
 }
-static void singleBtnClicked(){
 
-}
-static void multiBtnClicked(){
-	selectScene(MULTIPLAYER_ENGAGING);
-}
 /*end of button functions*/
 
-#define IMG_BACKGROUND IMG_SCENE_MENU_BG_STATIC
-#define CURRENT_SCENE MAIN_MENU
+#define IMG_BACKGROUND IMG_SCENE_MULTIPLAYER_ENGAGING_BG_STATIC
+#define CURRENT_SCENE MULTIPLAYER_ENGAGING
 
 static void init(){
 	quit = malloc(sizeof(bool));
@@ -40,9 +35,14 @@ static void init(){
 	if(inputBoxCount){
 		pInputBoxes = malloc(inputBoxCount*sizeof(struct inputBox*));
 	}
-	pBtns[0] = createButton(250,125,IMG_SCENE_MENU_BTN_SINGLEGAME_DEFAULT, IMG_SCENE_MENU_BTN_SINGLEGAME_MOUSEOVER,IMG_SCENE_MENU_BTN_SINGLEGAME_MOUSEOVER, &singleBtnClicked);
-	pBtns[1] = createButton(250,280,IMG_SCENE_MENU_BTN_MULTIPLAYER_DEFAULT, IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER,IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER, &multiBtnClicked);
-	pBtns[2] = createButton(250,435,IMG_SCENE_MENU_BTN_QUITGAME_DEFAULT, IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER,IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER, &quitBtnClicked);
+	/*place buttons and input fields here */
+	pBtns[0] = createButton(250,125,IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CLIENT_DEFAULT_MOUSEOVER,
+			IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CLIENT_DEFAULT_MOUSEOVER,
+			IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CLIENT_DEFAULT_MOUSEOVER,&clientServerBtnClicked);
+	pInputBoxes[0] = createInputBox(15,292,290,false,FONT_OPENSANS_BOLD,255,255,255,true,IMG_SCENE_MULTIPLAYER_ENGAGING_INPUT_BG);
+
+	/*end of button and input fields placement*/
+
 	wasInitiated = true;
 }
 static void unInit(){
@@ -114,5 +114,5 @@ static void renderScene()
 }
 
 
-struct scene menuScene = {&handleEvents, &renderScene, &init, &unInit};
+struct scene multiplayerEngagingScene = {&handleEvents, &renderScene, &init, &unInit};
 

@@ -17,7 +17,7 @@ void renderTexture(struct texture* pTexture, int x, int y){
 }
 bool createFromText(struct texture* pTexture, int fontName, const char* text, SDL_Color textColor){
 	if(pTexture->lTexture != NULL){
-		free(pTexture->lTexture);
+		SDL_DestroyTexture(pTexture->lTexture);
 		pTexture->lTexture = NULL;
 	}
 	SDL_Surface* textSurface = TTF_RenderText_Solid(getFont(fontName),text,textColor);
@@ -38,4 +38,10 @@ bool createFromText(struct texture* pTexture, int fontName, const char* text, SD
 
 	}
 	return (pTexture->lTexture != NULL ? true : false);
+}
+void destroyTexture(struct texture* pTexture){
+	if(pTexture->lTexture != NULL){
+			SDL_DestroyTexture(pTexture->lTexture);
+	}
+	free(pTexture);
 }

@@ -6,6 +6,7 @@ struct scene;
 enum sceneList{
 	MAIN_MENU,
 	TEST,
+	MULTIPLAYER_ENGAGING,
 	QUIT
 };
 extern struct scene* sceneList[];
