@@ -21,7 +21,8 @@ static void quitBtnClicked(){
 	selectScene(QUIT);
 }
 static void singleBtnClicked(){
-
+	changeButtonTexture(pBtns[0], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_SAVE_DEFAULT);
+	changeButtonTexture(pBtns[0], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_SAVE_MOUSEOVER);
 }
 static void multiBtnClicked(){
 	selectScene(MULTIPLAYER_ENGAGING);

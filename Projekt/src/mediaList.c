@@ -25,5 +25,18 @@ char* mediaLocations[]={
 			"media/img/scene_multiplayer_engaging/multiplayer_btn_netstate_server_default_mouseover.png",
 			"media/img/scene_multiplayer_engaging/multiplayer_inputbg.png",
 			"media/img/scene_multiplayer_engaging/multiplayer_engaging_bg_static.png",
+			"media/img/scene_singleplayer/singleplayer_bg_static.png",
+			"media/img/scene_singleplayer/singleplayer_btn_board_blank_default.png",
+			"media/img/scene_singleplayer/singleplayer_btn_board_blank_mouseover.png",
+			"media/img/scene_singleplayer/singleplayer_btn_board_circle_default.png",
+			"media/img/scene_singleplayer/singleplayer_btn_board_circle_mouseover.png",
+			"media/img/scene_singleplayer/singleplayer_btn_board_cross_default.png",
+			"media/img/scene_singleplayer/singleplayer_btn_board_cross_mouseover.png",
+			"media/img/scene_singleplayer/singleplayer_btn_save_default.png",
+			"media/img/scene_singleplayer/singleplayer_btn_save_mouseover.png",
+			"media/img/scene_singleplayer/singleplayer_btn_undomove_active.png",
+			"media/img/scene_singleplayer/singleplayer_btn_undomove_mouseover.png",
+			"media/img/scene_singleplayer/singleplayer_btn_undomove_unactive.png",
+
 			"media/fonts/OpenSans-Bold.ttf"
 	};

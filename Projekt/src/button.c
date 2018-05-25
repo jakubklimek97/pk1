@@ -18,6 +18,7 @@ struct button* createButton(int x, int y, enum mediaList defaultTexture,  enum m
 	pButton->height = pButton->bTexture[BUTTON_DEFAULT]->height;
 	pButton->state = BUTTON_DEFAULT;
 	pButton->pFunction = (void(*)())pFunction;
+	pButton->isVisible = true;
 	return pButton;
 }
 void destroyButton(struct button* pointer){
@@ -26,7 +27,7 @@ void destroyButton(struct button* pointer){
 	}
 }
 void renderButton(struct button* pButton){
-	if(pButton)
+	if(pButton && pButton->isVisible)
 		renderTexture(pButton->bTexture[pButton->state], pButton->position.x, pButton->position.y);
 }
 void handeEvent(struct button* btn, SDL_Event* e){
@@ -57,4 +58,10 @@ void handeEvent(struct button* btn, SDL_Event* e){
 			}
 		}
 	}
+}
+void changeButtonTexture(struct button* pButton, enum buttonState state, enum mediaList texture){
+	pButton->bTexture[state] = pTexture[texture];
+}
+void toggleButtonVisibility(struct button* pButton){
+	pButton->isVisible = !(pButton->isVisible);
 }
