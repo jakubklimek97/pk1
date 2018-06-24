@@ -25,7 +25,6 @@ char player;
 char opponent;
 char prevBoard[3][3];
 char board[3][3];
-int moves = 0;
 bool isEmptyPlace(char board[3][3]);
 enum whoWon lookForWinner(char board[3][3]);
 int minMax(char board[3][3], int depth, bool isMaximalising);

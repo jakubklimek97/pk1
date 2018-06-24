@@ -88,7 +88,6 @@ int main(){
 				while(SDL_PollEvent(&e) != 0){
 					if(selectedScene == QUIT) break;
 					currScene->handleEvents(&e);
-
 				}
 				if(selectedScene == QUIT) break;
 				currScene->renderScene();

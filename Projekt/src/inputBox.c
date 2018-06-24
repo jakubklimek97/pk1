@@ -54,6 +54,7 @@ void inputBoxRender(struct inputBox* pInputBox){
 	if(pInputBox->isVisible){
 		if(pInputBox->updateNeeded == true){
 			createFromText(pInputBox->texture,pInputBox->font,pInputBox->textField, pInputBox->color);
+			pInputBox->updateNeeded = false;
 		}
 		if(pInputBox->backgroundTexture != NULL){
 			renderTexture(pInputBox->backgroundTexture, pInputBox->position.x-5, pInputBox->position.y-5);

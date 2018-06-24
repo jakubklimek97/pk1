@@ -9,6 +9,7 @@
 #include "scene.h"
 /*extern for every scene */
 #include "sceneMultiplayerEngaging.h"
+#include "sceneSingleplayer.h"
 struct scene testScene;
 struct scene menuScene;
 /*end extern*/
@@ -16,5 +17,6 @@ struct scene menuScene;
 struct scene* sceneList[] = {
 		&menuScene,
 		&testScene,
+		&singleplayerScene,
 		&multiplayerEngagingScene
 };

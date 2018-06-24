@@ -4,8 +4,10 @@
  *  Created on: 10 maj 2018
  *      Author: klimek
  */
-#include "sceneMenu.h"
+#include "sceneSingleplayer.h"
+#include "minmax.h"
 #include <string.h>
+
 
 extern SDL_Renderer* gRenderer;
 static  SDL_Texture* currTex = NULL;
@@ -14,24 +16,36 @@ static bool wasInitiated = false;
 static struct button** pBtns = NULL;
 static struct inputBox** pInputBoxes = NULL;
 
-static int btnCount = 3;
+static int btnCount = 9;
 static int inputBoxCount = 0;
+static bool wasClicked = false;
 /*button functions*/
 static void quitBtnClicked(){
 	selectScene(QUIT);
 }
 static void singleBtnClicked(){
-	/*changeButtonTexture(pBtns[0], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_SAVE_DEFAULT);
-	changeButtonTexture(pBtns[0], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_SAVE_MOUSEOVER);*/
-	selectScene(SINGLEPLAYER);
+	changeButtonTexture(pBtns[0], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_SAVE_DEFAULT);
+	changeButtonTexture(pBtns[0], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_SAVE_MOUSEOVER);
 }
 static void multiBtnClicked(){
 	selectScene(MULTIPLAYER_ENGAGING);
 }
+static void boardClicked(){
+	wasClicked = true;
+}
+void handleQuad(int processedButton){
+	if(board[processedButton/3][processedButton%3] == '_'){
+		board[processedButton/3][processedButton%3] = player;
+		changeButtonTexture(pBtns[processedButton], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT);
+		changeButtonTexture(pBtns[processedButton], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_MOUSEOVER);
+	}
+}
 /*end of button functions*/
 
-#define IMG_BACKGROUND IMG_SCENE_MENU_BG_STATIC
-#define CURRENT_SCENE MAIN_MENU
+#define IMG_BACKGROUND IMG_SCENE_SINGLEPLAYER_BG_STATIC
+#define CURRENT_SCENE SINGLEPLAYER
+
+
 
 static void init(){
 	quit = malloc(sizeof(bool));
@@ -42,9 +56,13 @@ static void init(){
 	if(inputBoxCount){
 		pInputBoxes = malloc(inputBoxCount*sizeof(struct inputBox*));
 	}
-	pBtns[0] = createButton(250,125,IMG_SCENE_MENU_BTN_SINGLEGAME_DEFAULT, IMG_SCENE_MENU_BTN_SINGLEGAME_MOUSEOVER,IMG_SCENE_MENU_BTN_SINGLEGAME_MOUSEOVER, &singleBtnClicked);
-	pBtns[1] = createButton(250,280,IMG_SCENE_MENU_BTN_MULTIPLAYER_DEFAULT, IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER,IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER, &multiBtnClicked);
-	pBtns[2] = createButton(250,435,IMG_SCENE_MENU_BTN_QUITGAME_DEFAULT, IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER,IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER, &quitBtnClicked);
+	/* game grid */
+	int index;
+	for(index = 0; index < 9; ++index){
+		pBtns[index] = createButton(25+150*(index%3),120+150*(index/3),IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_DEFAULT,
+			IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_MOUSEOVER,IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_DEFAULT,&boardClicked);
+	}
+	memset(board,'_',sizeof(char)*9);
 	wasInitiated = true;
 }
 static void unInit(){
@@ -92,6 +110,10 @@ static void handleEvents(SDL_Event *e){
 	int processedButton;
 	for(processedButton = 0;selectedScene == CURRENT_SCENE && processedButton < btnCount; ++processedButton){
 		handeEvent(pBtns[processedButton], e);
+		if(wasClicked == true){
+			wasClicked = false;
+			handleQuad(processedButton);
+		}
 	}
 }
 static void renderScene()
@@ -116,5 +138,5 @@ static void renderScene()
 }
 
 
-struct scene menuScene = {&handleEvents, &renderScene, &init, &unInit};
+struct scene singleplayerScene = {&handleEvents, &renderScene, &init, &unInit};
 

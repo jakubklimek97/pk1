@@ -6,6 +6,7 @@ struct scene;
 enum sceneList{
 	MAIN_MENU,
 	TEST,
+	SINGLEPLAYER,
 	MULTIPLAYER_ENGAGING,
 	QUIT
 };
