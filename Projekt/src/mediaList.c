@@ -34,9 +34,13 @@ char* mediaLocations[]={
 			"media/img/scene_singleplayer/singleplayer_btn_board_cross_mouseover.png",
 			"media/img/scene_singleplayer/singleplayer_btn_save_default.png",
 			"media/img/scene_singleplayer/singleplayer_btn_save_mouseover.png",
+			"media/img/scene_singleplayer/singleplayer_btn_load_default.png",
+			"media/img/scene_singleplayer/singleplayer_btn_load_mouseover.png",
 			"media/img/scene_singleplayer/singleplayer_btn_undomove_active.png",
 			"media/img/scene_singleplayer/singleplayer_btn_undomove_mouseover.png",
 			"media/img/scene_singleplayer/singleplayer_btn_undomove_unactive.png",
+			"media/img/scene_scoreboard/scoreboard_bg_static.png",
+			"media/img/scene_scoreboard/scoreboard_input_box.png",
 
 			"media/fonts/OpenSans-Bold.ttf"
 	};

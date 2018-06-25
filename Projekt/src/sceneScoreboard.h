@@ -5,8 +5,8 @@
  *      Author: klimek
  */
 
-#ifndef SCENESINGLEPLAYER_H_
-#define SCENESINGLEPLAYER_H_
+#ifndef SCENESCOREBOARD_H_
+#define SCENESCOREBOARD_H_
 #include "scene.h"
 #include "sceneList.h"
 #include "mediaLoader.h"
@@ -16,5 +16,7 @@
 #include <SDL2/SDL.h>
 #include "bool.h"
 
-extern struct scene singleplayerScene;
-#endif /* SCENEMENU_H_ */
+extern struct scene scoreboardScene;
+void addScore(int score);
+
+#endif /* SCENESCOREBOARD_H_ */

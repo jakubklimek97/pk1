@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_net.h>
 
 #include "bool.h"
 #include "defines.h"
@@ -43,15 +43,22 @@ bool inicjalizacja(){
 			else{
 				if(TTF_Init() == -1){
 					printf("SDL_ttf nie mogl zostac zinicjalizowany: %s\n", TTF_GetError());
+					czySukces = false;
 				}
 				else{
-					gRenderer = SDL_CreateRenderer(gWindow,-1,SDL_RENDERER_ACCELERATED);
-					if(gRenderer == NULL){
-						printf("Renderer nie mogl zostac utworzony: %s\n", SDL_GetError());
+					if(SDLNet_Init() == -1){
+						printf("SDL_net nie mogl zostac zinicjalizowany: %s\n", TTF_GetError());
 						czySukces = false;
 					}
-					else{
+					else {
+						gRenderer = SDL_CreateRenderer(gWindow,-1,SDL_RENDERER_ACCELERATED);
+						if(gRenderer == NULL){
+							printf("Renderer nie mogl zostac utworzony: %s\n", SDL_GetError());
+							czySukces = false;
+						}
+						else{
 						SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+						}
 					}
 				}
 			}
@@ -66,6 +73,7 @@ void zamknij(){
 	unloadMedia();
 	SDL_DestroyRenderer(gRenderer);
 	SDL_DestroyWindow(gWindow);
+	SDLNet_Quit();
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
@@ -81,15 +89,13 @@ int main(){
 		}
 		else{
 			selectScene(MAIN_MENU);
-
-
 			SDL_Event e;
 			while(selectedScene != QUIT){
 				while(SDL_PollEvent(&e) != 0){
 					if(selectedScene == QUIT) break;
 					currScene->handleEvents(&e);
 				}
-				if(selectedScene == QUIT) break;
+				if(selectedScene== QUIT) break;
 				currScene->renderScene();
 				/*SDL_RenderClear(gRenderer);
 				SDL_RenderCopy(gRenderer,currTex,NULL,NULL);

@@ -8,6 +8,8 @@ enum sceneList{
 	TEST,
 	SINGLEPLAYER,
 	MULTIPLAYER_ENGAGING,
+	SCOREBOARD,
+	MULTIPLAYER,
 	QUIT
 };
 extern struct scene* sceneList[];

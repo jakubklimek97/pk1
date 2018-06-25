@@ -47,6 +47,7 @@ void inputBoxAppendChar(struct inputBox* pInputBox, char character){
 void inputBoxPopCharacter(struct inputBox* pInputBox){
 	if(pInputBox->charsWritten > 0){
 		pInputBox->textField[--(pInputBox->charsWritten)] = '\0';
+		if(pInputBox->charsWritten == 0) pInputBox->textField[0] = ' ';
 		pInputBox->updateNeeded = true;
 	}
 }

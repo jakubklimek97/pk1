@@ -5,8 +5,8 @@
  *      Author: klimek
  */
 
-#ifndef SCENESINGLEPLAYER_H_
-#define SCENESINGLEPLAYER_H_
+#ifndef SCENEMULTIPLAYER_H_
+#define SCENEMULTIPLAYER_H_
 #include "scene.h"
 #include "sceneList.h"
 #include "mediaLoader.h"
@@ -14,7 +14,8 @@
 #include "button.h"
 #include "inputBox.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_net.h>
 #include "bool.h"
 
-extern struct scene singleplayerScene;
-#endif /* SCENEMENU_H_ */
+extern struct scene multiplayerScene;
+#endif /* SCENEMULTIPLAYER_H_ */
