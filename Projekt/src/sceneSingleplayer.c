@@ -160,6 +160,7 @@ void handleQuad(int processedButton){/*obsluga wcisnietego przycisku*/
 				hasEnded = true;
 				SDL_Color color = {255,0,0,255};
 				createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
+				addScore(0);
 				disableUndoButton();/*koniec gry, nie ma mowy o cofaniu, zapisywaniu badz wczytywaniu*/
 				disableSaveButton();
 				disableLoadButton();
@@ -170,6 +171,7 @@ void handleQuad(int processedButton){/*obsluga wcisnietego przycisku*/
 			hasEnded = true;
 			SDL_Color color = {255,0,0,255};
 			createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
+			addScore(0);
 			disableUndoButton();
 			disableSaveButton();
 			disableLoadButton();
