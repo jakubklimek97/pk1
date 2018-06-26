@@ -8,16 +8,10 @@
 #include "sceneScoreboard.h"
 #include "minmax.h"
 #include "defines.h"
+#include "sceneGlobals.h"
+#include "game.h"
 #include <string.h>
 #include <stdlib.h>
-
-
-extern SDL_Renderer* gRenderer;
-static  SDL_Texture* currTex = NULL;
-static bool* quit;
-static bool wasInitiated = false;
-static struct button** pBtns = NULL;
-static struct inputBox** pInputBoxes = NULL;
 
 static int btnCount = 12;
 static int inputBoxCount = 0;
@@ -29,12 +23,15 @@ int score;
 struct texture *text;
 static bool hasEnded;
 static uint32_t ticks;
-static bool msg;
+static bool msg; /*czy wiadomosc oczekuje na wyswietlenie*/
+
+/*Ponizsze trzy funkcje wlaczaja/wylaczaja przyciski*/
 void enableUndoButton();
 void disableUndoButton();
 void disableLoadButton();
-/*button functions*/
+/*Funkcje przyciskow*/
 static void saveBtnClicked(){
+	/*odczyt pliku do zmiennej*/
 	FILE* saveFile = fopen("save.dat","wb");
 	if(saveFile != NULL){
 		fwrite((void*)board,sizeof(char),3,saveFile);
@@ -44,46 +41,52 @@ static void saveBtnClicked(){
 		fwrite((void*)&lastBotMove,sizeof(int),1,saveFile);
 		fwrite((void*)&score,sizeof(int),1,saveFile);
 		fclose(saveFile);
-		msg = true;
-		ticks = SDL_GetTicks();
+		msg = true; /*Pojawi sie wiadomosc*/
+		ticks = SDL_GetTicks(); /*trwajaca 2sekundy od teraz*/
 		SDL_Color color = {255,0,0,255};
 		createFromText(text, FONT_OPENSANS_BOLD,"Progress has been saved.",color);
 	}
 }
 
 static void undoBtnClicked(){
-
+	/*ustaw tekstury szachownicy na takie jak w poprzednim ruchu*/
 	changeButtonTexture(pBtns[lastBotMove], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_DEFAULT);
 	changeButtonTexture(pBtns[lastBotMove], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_MOUSEOVER);
 	changeButtonTexture(pBtns[lastPlayerMove], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_DEFAULT);
 	changeButtonTexture(pBtns[lastPlayerMove], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_MOUSEOVER);
+	/*cofnij zmiany na planszy*/
 	board[lastBotMove/3][lastBotMove%3] = '_';
 	board[lastPlayerMove/3][lastPlayerMove%3] = '_';
+	/*dalsze cofanie niedozwolone*/
 	lastPlayerMove = -1;
 	lastBotMove = -1;
-	score -= 40/SINGLEPLAYER_DIFFICULTY;
-	disableUndoButton();
+	score -= 40/difficulty(0);/*odejmij punkty za cofniecie*/
+	disableUndoButton();/*wylaczenie przycisku do cofania*/
 }
 static void loadBtnClicked(){
 	FILE* loadedFile = fopen("save.dat","rb");
 	if(loadedFile == NULL){
+		/*jezeli plik nie istnieje, wypisz odpowiednia wiadomosc*/
 		msg = true;
 		ticks = SDL_GetTicks();
 		SDL_Color color = {255,0,0,255};
 		createFromText(text, FONT_OPENSANS_BOLD,"Save file doesn't exist.",color);
 	}
 	else{
+		/*odczyt pliku*/
 		fread((void*)board,sizeof(char),3,loadedFile);
 		fread((void*)(board+1),sizeof(char),3,loadedFile);
 		fread((void*)(board+2),sizeof(char),3,loadedFile);
 		fread((void*)&lastPlayerMove,sizeof(int),1,loadedFile);
 		fread((void*)&lastBotMove,sizeof(int),1,loadedFile);
 		if(fread((void*)&score,sizeof(int),1,loadedFile) == 0){
+			/*jezeli nie udalo sie wszystkiego odczytac wypisz odpowiednia wiadomosc*/
 			msg = true;
 			ticks = SDL_GetTicks();
 			SDL_Color color = {255,0,0,255};
 			createFromText(text, FONT_OPENSANS_BOLD,"Error occured during loading.",color);
 		}
+		/*ustaw tekstury planszy na odpowiadajace ustawieniu planszy*/
 		int index;
 		for(index = 0; index < 9; ++index){
 			switch(board[index/3][index%3]){
@@ -101,6 +104,7 @@ static void loadBtnClicked(){
 			}
 
 		}
+		/*jezeli zapis nie zawiera poprzedniego ruchu, zablokuj przycisk do cofania*/
 		if(lastPlayerMove != -1){
 			pBtns[10]->pFunction = &undoBtnClicked;
 			changeButtonTexture(pBtns[10], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_ACTIVE);
@@ -127,40 +131,42 @@ void enableUndoButton(){
 	changeButtonTexture(pBtns[10], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_ACTIVE);
 	changeButtonTexture(pBtns[10], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_MOUSEOVER);
 }
-void handleQuad(int processedButton){
-	if(board[processedButton/3][processedButton%3] == '_'){
-		board[processedButton/3][processedButton%3] = opponent;
+void handleQuad(int processedButton){/*obsluga wcisnietego przycisku*/
+	if(board[processedButton/3][processedButton%3] == '_'){ /*jezeli pole jest puste*/
+		board[processedButton/3][processedButton%3] = opponent;/*wstaw tam znak gracza, i zmien tekstury pola*/
 		changeButtonTexture(pBtns[processedButton], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT);
 		changeButtonTexture(pBtns[processedButton], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_MOUSEOVER);
-		lastPlayerMove = processedButton;
-		enum whoWon result = lookForWinner(board);
-		if(result == 0){
-			if(isEmptyPlace(board)){
+		lastPlayerMove = processedButton;/*ustawienie tego pola jako ostatni ruch gracza*/
+		enum whoWon result = lookForWinner(board);/*sprawdz, czy gracz dzieki temu wygral*/
+		if(result == 0){/*jezeli nie ma zwyciezcy*/
+			if(isEmptyPlace(board)){/*i istnieje wolne miejsce*/
+				/*sprawdz, czy w tej chwili bot "ma ochote" wykonac ruch bedacy w interesie gracza*/
 				int generated = SDL_GetTicks()%5;
-				if(generated > SINGLEPLAYER_DIFFICULTY){
+				if(generated > difficulty(0)){
 					setupBot(X);
 				}
-				struct minMax_Move nextMove = findBestMove(board);
-				board[nextMove.row][nextMove.col] = generated > SINGLEPLAYER_DIFFICULTY ? opponent:player;
+				struct minMax_Move nextMove = findBestMove(board); /*znajdz najlepszy dostepny ruch i wykonaj go (analogicznie do gracza)*/
+				board[nextMove.row][nextMove.col] = generated > difficulty(0) ? opponent:player;
 				changeButtonTexture(pBtns[nextMove.row*3+nextMove.col], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_DEFAULT);
 				changeButtonTexture(pBtns[nextMove.row*3+nextMove.col], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER);
-				lastBotMove = nextMove.row*3+nextMove.col;
-				enableUndoButton();
-				if(generated > SINGLEPLAYER_DIFFICULTY){
+				lastBotMove = nextMove.row*3+nextMove.col; /*ostatni ruch bota*/
+				enableUndoButton();/*skoro mamy ostatnie ruchy, mozemy je cofnac*/
+				if(generated > difficulty(0)){
 					setupBot(O);
 				}
-				result = lookForWinner(board);
+				result = lookForWinner(board);/*sprawdz, czy dalej nie ma zwyciezcy*/
 			}else{
+				/*jezeli nie ma miejsca, jest remis. Pzygotuj wiadomosc do wypisania i ustaw flage hasEnded na true*/
 				hasEnded = true;
 				SDL_Color color = {255,0,0,255};
 				createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
-				disableUndoButton();
+				disableUndoButton();/*koniec gry, nie ma mowy o cofaniu, zapisywaniu badz wczytywaniu*/
 				disableSaveButton();
 				disableLoadButton();
 			}
 		}
 
-		if(result == PLAYER){
+		if(result == PLAYER){/*jezeli wygral bot*/
 			hasEnded = true;
 			SDL_Color color = {255,0,0,255};
 			createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
@@ -168,12 +174,12 @@ void handleQuad(int processedButton){
 			disableSaveButton();
 			disableLoadButton();
 		}
-		if(result == OPPONENT){
+		if(result == OPPONENT){/*jezeli wygral gracz*/
 			hasEnded = true;
 			SDL_Color color = {255,0,0,255};
 			char textCstr[64] = { '\0' };
 			sprintf(textCstr,"You won. Your score: %d. Press Enter to exit.",score);
-			addScore(score);
+			addScore(score);/*dodaj wynik do tablicy wynikow*/
 			createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
 			disableUndoButton();
 			disableSaveButton();
@@ -181,19 +187,19 @@ void handleQuad(int processedButton){
 		}
 	}
 }
-/*end of button functions*/
+/*Funkcje przyciskow*/
 
 #define IMG_BACKGROUND IMG_SCENE_SINGLEPLAYER_BG_STATIC
 #define CURRENT_SCENE SINGLEPLAYER
 
 
 
-static void init(){
+static void init(){/*omowione w sceneMenu.c*/
 	quit = malloc(sizeof(bool));
 	*quit = false;
 	text = malloc(sizeof(struct texture));
 	text->lTexture = NULL;
-	hasEnded = false;
+	hasEnded = false;/*gra sie nie skonczyla*/
 
 	if(btnCount){
 		pBtns = malloc(btnCount*sizeof(struct button*));
@@ -201,7 +207,7 @@ static void init(){
 	if(inputBoxCount){
 		pInputBoxes = malloc(inputBoxCount*sizeof(struct inputBox*));
 	}
-	/* game grid */
+	/* pierwsze 9 przyciskow definiuje plansze do gry */
 	int index;
 	for(index = 0; index < 9; ++index){
 		pBtns[index] = createButton(25+150*(index%3),120+150*(index/3),IMG_SCENE_SINGLEPLAYER_BTN_BOARD_BLANK_DEFAULT,
@@ -213,10 +219,10 @@ static void init(){
 			IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_UNACTIVE, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_UNACTIVE, NULL);
 	pBtns[11] = createButton(489,429, IMG_SCENE_SINGLEPLAYER_BTN_LOAD_DEFAULT,
 			IMG_SCENE_SINGLEPLAYER_BTN_LOAD_MOUSEOVER,IMG_SCENE_SINGLEPLAYER_BTN_LOAD_DEFAULT,&loadBtnClicked);
-	memset(board,'_',sizeof(char)*9);
-	setupBot(O);
-	score = 1000;
-	msg = false;
+	memset(board,'_',sizeof(char)*9);/*wyzeruj plansze*/
+	setupBot(O); /*bot gra kolkiem*/
+	score = 1000;/*poczatkowy wynik*/
+	msg = false;/*nie ma wiadomosci do wypisania*/
 	wasInitiated = true;
 }
 static void unInit(){
@@ -231,11 +237,11 @@ static void unInit(){
 		}
 	free(pBtns);
 	free(pInputBoxes);
-	destroyTexture(text);
+	destroyTexture(text);/*usun teksture, ktora przechowywala wiadomosc*/
 }
 
 
-static void handleEvents(SDL_Event *e){
+static void handleEvents(SDL_Event *e){/*Funkcja omowiona w sceneMenu.c*/
 
 	if(!wasInitiated){
 		init();
@@ -245,18 +251,18 @@ static void handleEvents(SDL_Event *e){
 		return;
 	}
 	if(hasEnded && e->type == SDL_KEYDOWN && (e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym == SDLK_RETURN2)){
-		selectScene(SCOREBOARD);
+		selectScene(SCOREBOARD);/*jezeli gra sie zakonczyla a uzytkownik potwierdzil komunikat na ekranie, przejdz do tablicy wynikow*/
 	}
 	int processedButton;
 	for(processedButton = 0;selectedScene == CURRENT_SCENE && processedButton < btnCount; ++processedButton){
 		handeEvent(pBtns[processedButton], e);
-		if(wasClicked == true){
+		if(wasClicked == true){/*jezeli aktualnie przetwarzany przycisk zostal klikniety, wykonaj odpowiednia akcje*/
 			wasClicked = false;
 			handleQuad(processedButton);
 		}
 	}
 }
-static void renderScene()
+static void renderScene()/*Funkcja omowiona  w sceneMenu.c*/
 {
 	if(*quit == true){
 		selectScene(QUIT);
@@ -265,8 +271,8 @@ static void renderScene()
 	if(currTex == NULL){
 		currTex = getTexture(IMG_BACKGROUND);
 	}
-		SDL_RenderClear(gRenderer);
-		SDL_RenderCopy(gRenderer,currTex,NULL,NULL);
+		SDL_RenderClear(getRenderer());
+		SDL_RenderCopy(getRenderer(),currTex,NULL,NULL);
 		int processed;
 		for(processed = 0; processed < btnCount; ++processed){
 			renderButton(pBtns[processed]);
@@ -277,13 +283,13 @@ static void renderScene()
 		if(hasEnded == true){
 			renderTexture(text,(SCREEN_WIDTH-text->width)/2,(SCREEN_HEIGHT-text->height)/2);
 		}
-		else if(msg){
+		else if(msg){/*jezeli gra dalej trwa i istnieje wiadomosc do pokazania*/
 			renderTexture(text,(SCREEN_WIDTH-text->width)/2,(SCREEN_HEIGHT-text->height)/2);
 			if(SDL_GetTicks() - ticks > 2000){
-				msg = false;
+				msg = false;/*jezeli wiadomosc istnieje ponad 2 sekundy, nie pokazuj jej wiecej*/
 			}
 		}
-		SDL_RenderPresent(gRenderer);
+		SDL_RenderPresent(getRenderer());
 }
 
 

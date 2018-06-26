@@ -8,8 +8,8 @@
 #ifndef MEDIALIST_H_
 #define MEDIALIST_H_
 #define NULL_TEXTURE MEDIA_COUNT
-
-	enum mediaList{
+/*nazwy tekstur */
+enum mediaList{
 		IMG_HELLOWORD,
 		IMG_UP,
 		IMG_DOWN,
@@ -25,8 +25,10 @@
 		IMG_SCENE_MENU_BTN_MULTIPLAYER_MOUSEOVER,
 		IMG_SCENE_MENU_BTN_QUITGAME_DEFAULT,
 		IMG_SCENE_MENU_BTN_QUITGAME_MOUSEOVER,
+		/*multiplayer scenes */
 		IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CLIENT_DEFAULT_MOUSEOVER,
 		IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_SERVER_DEFAULT_MOUSEOVER,
+		IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CONNECTING_DEFAULT_MOUSEOVER,
 		IMG_SCENE_MULTIPLAYER_ENGAGING_INPUT_BG,
 		IMG_SCENE_MULTIPLAYER_ENGAGING_BG_STATIC,
 		/*SinglePlayer Scene*/
@@ -48,16 +50,14 @@
 		IMG_SCENE_SCOREBOARD_BG_STATIC,
 		IMG_SCENE_SCOREBOARD_INPUTBOX_BG_STATIC,
 
-
 		MEDIA_COUNT
-	};
-	enum fontList{
+};
+/*nazwy czcionek */
+enum fontList{
 		FONT_OPENSANS_BOLD,
 		FONT_COUNT
-	};
-	extern char* mediaLocations[];
-
-
-
+};
+/*tutaj przechowywane sa lokalizacje wyzej podanych tekstur/czcionek */
+extern char* mediaLocations[];
 
 #endif /* MEDIALIST_H_ */

@@ -6,6 +6,7 @@
  */
 #include "mediaList.h"
 char* mediaLocations[]={
+			/*TEXTURES*/
 			"media/img/helloworld.bmp",
 			"media/img/up.png",
 			"media/img/down.png",
@@ -23,6 +24,7 @@ char* mediaLocations[]={
 			"media/img/scene_menu/menu_btn_quitgame_mouseover.png",
 			"media/img/scene_multiplayer_engaging/multiplayer_btn_netstate_client_default_mouseover.png",
 			"media/img/scene_multiplayer_engaging/multiplayer_btn_netstate_server_default_mouseover.png",
+			"media/img/scene_multiplayer_engaging/multiplayer_btn_netstate_connecting.png",
 			"media/img/scene_multiplayer_engaging/multiplayer_inputbg.png",
 			"media/img/scene_multiplayer_engaging/multiplayer_engaging_bg_static.png",
 			"media/img/scene_singleplayer/singleplayer_bg_static.png",
@@ -41,6 +43,6 @@ char* mediaLocations[]={
 			"media/img/scene_singleplayer/singleplayer_btn_undomove_unactive.png",
 			"media/img/scene_scoreboard/scoreboard_bg_static.png",
 			"media/img/scene_scoreboard/scoreboard_input_box.png",
-
+			/*FONTS*/
 			"media/fonts/OpenSans-Bold.ttf"
-	};
+};

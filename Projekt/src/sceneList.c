@@ -7,18 +7,14 @@
 
 #include "sceneList.h"
 #include "scene.h"
-/*extern for every scene */
 #include "sceneMultiplayerEngaging.h"
 #include "sceneMultiplayer.h"
 #include "sceneSingleplayer.h"
 #include "sceneScoreboard.h"
-struct scene testScene;
-struct scene menuScene;
-/*end extern*/
+#include "sceneMenu.h"
 
 struct scene* sceneList[] = {
 		&menuScene,
-		&testScene,
 		&singleplayerScene,
 		&multiplayerEngagingScene,
 		&scoreboardScene,

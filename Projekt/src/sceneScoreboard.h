@@ -17,6 +17,12 @@
 #include "bool.h"
 
 extern struct scene scoreboardScene;
+
+/*Funkcja dodaje do tablicy wynikow nowy wynik
+ * Informuje o tym, ze gracz wygral. Jezeli przekazany wynik mozna
+ * umiescic na tablicy, nalezy zapytac uzytkownika o imie. Parametry:
+ * score - wynik uzytkownika
+ */
 void addScore(int score);
 
 #endif /* SCENESCOREBOARD_H_ */

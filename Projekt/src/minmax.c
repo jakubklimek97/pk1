@@ -46,8 +46,6 @@ enum whoWon lookForWinner(char board[3][3]){
 	                return OPPONENT;
 	        }
 	    }
-
-
 	    for (column = 0; column<3; ++column)
 	    {
 	        if (board[0][column]==board[1][column] &&
@@ -60,8 +58,6 @@ enum whoWon lookForWinner(char board[3][3]){
 	                return OPPONENT;
 	        }
 	    }
-
-
 	    if (board[0][0]==board[1][1] && board[1][1]==board[2][2])
 	    {
 	        if (board[0][0]==player)
@@ -69,7 +65,6 @@ enum whoWon lookForWinner(char board[3][3]){
 	        else if (board[0][0]==opponent)
 	            return OPPONENT;
 	    }
-
 	    if (board[0][2]==board[1][1] && board[1][1]==board[2][0])
 	    {
 	        if (board[0][2]==player)
@@ -77,74 +72,46 @@ enum whoWon lookForWinner(char board[3][3]){
 	        else if (board[0][2]==opponent)
 	            return OPPONENT;
 	    }
-
-
 	    return 0;
 }
 int minMax(char board[3][3], int depth, bool isMaximalising){
 		enum whoWon score = lookForWinner(board);
         int i,j;
-
-
 	    if (score == PLAYER)
 	        return score;
-
-
 	    if (score == OPPONENT)
 	        return score;
-
-
 	    if (isEmptyPlace(board) == false)
 	        return 0;
-
-
 	    if (isMaximalising)
 	    {
 	        int best = -1000;
-
-
-
 	        for (i = 0; i<3; i++)
 	        {
 	            for (j = 0; j<3; j++)
 	            {
-
 	                if (board[i][j]=='_')
 	                {
-
 	                    board[i][j] = player;
-
-	                    best = max( best,
-	                        minMax(board, depth+1, !isMaximalising) );
-
+	                    best = max( best, minMax(board, depth+1, !isMaximalising) );
 	                    board[i][j] = '_';
 	                }
 	            }
 	        }
 	        return best;
 	    }
-
-
 	    else
 	    {
 	        int best = 1000;
-
-
 	        for (i = 0; i<3; i++)
 	        {
 	            for (j = 0; j<3; j++)
 	            {
-
 	                if (board[i][j]=='_')
 	                {
-
 	                    board[i][j] = opponent;
-
-
 	                    best = min(best,
 	                           minMax(board, depth+1, !isMaximalising));
-
-
 	                    board[i][j] = '_';
 	                }
 	            }
@@ -158,23 +125,15 @@ struct minMax_Move findBestMove(char board[3][3]){
 	    bestMove.row = -1;
 	    bestMove.col = -1;
         int i,j;
-
-
 	    for (i = 0; i<3; i++)
 	    {
 	        for (j = 0; j<3; j++)
 	        {
-
 	            if (board[i][j]=='_')
 	            {
-
 	                board[i][j] = player;
-
 	                int moveVal = minMax(board, 0, false);
-
 	                board[i][j] = '_';
-
-
 	                if (moveVal > bestVal)
 	                {
 	                    bestMove.row = i;
@@ -184,6 +143,5 @@ struct minMax_Move findBestMove(char board[3][3]){
 	            }
 	        }
 	    }
-
 	    return bestMove;
 }

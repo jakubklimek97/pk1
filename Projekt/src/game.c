@@ -6,10 +6,10 @@
  */
 #include <stdio.h>
 #include <stdint.h>
-#include <SDL2/SDL.h>
 #include <SDL2/SDL_net.h>
 
 #include "bool.h"
+#include "game.h"
 #include "defines.h"
 
 #include "mediaLoader.h"
@@ -18,11 +18,31 @@
 #include "sceneList.h"
 #include "scene.h"
 
-SDL_Window* gWindow = NULL;
-/*SDL_Surface* gScreenSurface = NULL;*/
-SDL_Surface* gHelloWorld = NULL;
-SDL_Renderer* gRenderer = NULL;
-
+SDL_Window** setWindow(SDL_Window* pGWindow){
+	static SDL_Window* pointer;
+	if(pointer == NULL){
+		pointer = pGWindow;
+	}
+	return &pointer;
+}
+SDL_Window* getWindow(){
+	static SDL_Window** pointer;
+	if(pointer == NULL) pointer = setWindow(NULL);
+	return *pointer;
+}
+SDL_Renderer** setRenderer(SDL_Renderer* pRenderer){
+	static SDL_Renderer* pointer;
+	if(pointer == NULL){
+		pointer = pRenderer;
+	}
+	return &pointer;
+}
+SDL_Renderer* getRenderer(){
+	static SDL_Renderer** p;
+	if(p == NULL) p = setRenderer(NULL);
+	return *p;
+}
+/*Funkcja inicjalizujaca biblioteke SDL*/
 bool inicjalizacja(){
 	bool czySukces = true;
 	if(SDL_Init(SDL_INIT_VIDEO)){
@@ -30,8 +50,8 @@ bool inicjalizacja(){
 		czySukces = false;
 	}
 	else {
-		gWindow = SDL_CreateWindow("tutorial",SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,SCREEN_WIDTH,SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if(gWindow == NULL){
+		setWindow(SDL_CreateWindow("tutorial",SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,SCREEN_WIDTH,SCREEN_HEIGHT, SDL_WINDOW_SHOWN));
+		if(getWindow() == NULL){
 			printf("SDL nie mogl utworzyc okna: %s\n", SDL_GetError());
 			czySukces = false;
 		}else{
@@ -51,35 +71,34 @@ bool inicjalizacja(){
 						czySukces = false;
 					}
 					else {
-						gRenderer = SDL_CreateRenderer(gWindow,-1,SDL_RENDERER_ACCELERATED);
-						if(gRenderer == NULL){
+						setRenderer(SDL_CreateRenderer(getWindow(),-1,SDL_RENDERER_ACCELERATED));
+						if(getRenderer() == NULL){
 							printf("Renderer nie mogl zostac utworzony: %s\n", SDL_GetError());
 							czySukces = false;
 						}
 						else{
-						SDL_SetRenderDrawColor(gRenderer,0xFF,0xFF,0xFF,0xFF);
+						SDL_SetRenderDrawColor(getRenderer(),0xFF,0xFF,0xFF,0xFF);
 						}
 					}
 				}
 			}
-			/*gScreenSurface = SDL_GetWindowSurface(gWindow);*/
-
 		}
 	}
 
 	return czySukces;
 }
 void zamknij(){
+	/*Najpierw usuwamy media, po czym wychodzimy z SDLa (odwrotna kolejnosc niz przy inicjalizacji)*/
 	unloadMedia();
-	SDL_DestroyRenderer(gRenderer);
-	SDL_DestroyWindow(gWindow);
+	SDL_DestroyRenderer(getRenderer());
+	SDL_DestroyWindow(getWindow());
 	SDLNet_Quit();
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
 
-int main(){
+int run(){
 	if(inicjalizacja() == false){
 		perror("Nie udalo sie zinicjalizowac.\n");
 	}
@@ -88,8 +107,10 @@ int main(){
 			perror("Nie udalo sie zaladowac mediow.\n");
 		}
 		else{
+			/*zaczynamy na scenie z menu glownym*/
 			selectScene(MAIN_MENU);
 			SDL_Event e;
+			/*tak dlugo, jak wybrana scena jest rozna od QUIT, obsluguj eventy i renderuj scene*/
 			while(selectedScene != QUIT){
 				while(SDL_PollEvent(&e) != 0){
 					if(selectedScene == QUIT) break;
@@ -97,16 +118,29 @@ int main(){
 				}
 				if(selectedScene== QUIT) break;
 				currScene->renderScene();
-				/*SDL_RenderClear(gRenderer);
-				SDL_RenderCopy(gRenderer,currTex,NULL,NULL);
-				SDL_RenderCopy(gRenderer,currTex,NULL,&stretchRect);
-				SDL_RenderPresent(gRenderer);*/
-				/*(SDL_BlitScaled(curr,NULL,gScreenSurface,&stretchRect);
-				SDL_UpdateWindowSurface(gWindow);*/
 			}
-
+			/*Petla gry zakonczona, zwalniamy zasoby*/
 			zamknij();
+
 		}
 	}
 	return 0;
+}
+void restoreDefaults(){
+	FILE* saveFile = fopen("save.dat","rb");
+	if(saveFile != NULL){
+		fclose(saveFile);
+		remove("save.dat");/*usun plik(o ile istnieje)*/
+	}
+	saveFile = fopen("scores.dat", "rb");
+	if(saveFile != NULL){
+		fclose(saveFile);
+		remove("scores.dat");
+	}
+}
+int difficulty(int difficulty){
+	static int dif;
+	if(dif == 0) dif = 3;
+	if(difficulty > 0 && difficulty < 5) dif = difficulty;
+	return dif;
 }

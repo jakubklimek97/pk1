@@ -30,7 +30,6 @@ struct inputBox* createInputBox(size_t textFieldSize, int x, int y, bool isVisib
 	else{
 		pTmp->backgroundTexture = NULL;
 	}
-
 	return pTmp;
 }
 void destroyInputBox(struct inputBox* pInputBox){
@@ -47,7 +46,7 @@ void inputBoxAppendChar(struct inputBox* pInputBox, char character){
 void inputBoxPopCharacter(struct inputBox* pInputBox){
 	if(pInputBox->charsWritten > 0){
 		pInputBox->textField[--(pInputBox->charsWritten)] = '\0';
-		if(pInputBox->charsWritten == 0) pInputBox->textField[0] = ' ';
+		if(pInputBox->charsWritten == 0) pInputBox->textField[0] = ' ';/*Nie mozna wyswietlic pustego ciagu znakow*/
 		pInputBox->updateNeeded = true;
 	}
 }
@@ -68,7 +67,7 @@ void inputBoxToggleVisibility(struct inputBox* pInputBox){
 }
 void inputBoxClearTextField(struct inputBox* pInputBox){
 	memset(pInputBox->textField,0,sizeof(char)*pInputBox->textFieldSize);
-	pInputBox->textField[0] = ' ';
+	pInputBox->textField[0] = ' ';/*Nie mozna wyswietlic pustego ciagu znakow*/
 	pInputBox->charsWritten = 0;
 	pInputBox->updateNeeded = true;
 }

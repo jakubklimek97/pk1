@@ -6,22 +6,19 @@
  */
 
 #include "mediaLoader.h"
+#include "game.h"
 #include "mediaList.h"
 
 #define FONT_SIZE 28
 
-/*xtern SDL_Surface* gScreenSurface;*/
-extern SDL_Renderer* gRenderer;
 bool loadMedia(){
-	/*pSurfaces = NULL;*/
 	pTextures = NULL;
 	pTexture = NULL;
 	bool success = true;
 	if(MEDIA_COUNT > 0){
-		/*pSurfaces = malloc(MEDIA_COUNT*sizeof(SDL_Surface*));*/
 		pTextures = malloc(MEDIA_COUNT*sizeof(SDL_Texture*));
 		pTexture = malloc(MEDIA_COUNT*sizeof(struct texture*));
-		SDL_Surface* pTmpSur;
+		SDL_Surface* pTmpSur; /*aby utworzyc teksture potrzebny jest najpierw obiekt SDL_Surface*/
 		int currMedia = 0;
 		while(currMedia < MEDIA_COUNT){
 			pTmpSur = IMG_Load(mediaLocations[currMedia]);
@@ -29,17 +26,12 @@ bool loadMedia(){
 				printf("Nie mozna zaladowac obrazu: %s %s\n", mediaLocations[currMedia],IMG_GetError());
 				success = false;
 			}
-			/*pSurfaces[currMedia] = SDL_ConvertSurface(pTmpSur,gScreenSurface->format,0);
-			if(pSurfaces[currMedia] == NULL){
-				printf("Nie mozna zoptymalizowac obrazu: %s %s\n", mediaLocations[currMedia], SDL_GetError());
-				success = false;
-			}*/
 			else {
-				pTextures[currMedia] = SDL_CreateTextureFromSurface(gRenderer,pTmpSur);
+				pTextures[currMedia] = SDL_CreateTextureFromSurface(getRenderer(),pTmpSur); /*utworzenie tekstury*/
 				pTexture[currMedia] = (struct texture*)malloc(sizeof(struct texture));
 				pTexture[currMedia]->height = pTmpSur->h;
 				pTexture[currMedia]->width = pTmpSur->w;
-				pTexture[currMedia]->lTexture = SDL_CreateTextureFromSurface(gRenderer,pTmpSur);
+				pTexture[currMedia]->lTexture = SDL_CreateTextureFromSurface(getRenderer(),pTmpSur);/*po raz drugi, zeby dwie tablice byly niezalezne*/
 				if(pTexture[currMedia]->lTexture == NULL){
 					printf("Nie mozna zaladowac tekstury: %s Blad: %s\n", mediaLocations[currMedia],SDL_GetError());
 					success = false;
@@ -62,9 +54,6 @@ bool loadMedia(){
 	}
 	return success;
 }
-/*SDL_Surface* getSurface(int mediaNumber){
-	return pSurfaces[mediaNumber];
-}*/
 SDL_Texture* getTexture(int mediaNumber){
 	return pTexture[mediaNumber]->lTexture;
 }
@@ -74,7 +63,6 @@ TTF_Font* getFont(int fontNumber){
 void unloadMedia(){
 	int currMedia = 0;
 	while(currMedia < MEDIA_COUNT){
-		/*SDL_FreeSurface(pSurfaces[currMedia]);*/
 		SDL_DestroyTexture(pTextures[currMedia]);
 		SDL_DestroyTexture(pTexture[currMedia]->lTexture);
 		free(pTexture[currMedia]);
@@ -85,7 +73,6 @@ void unloadMedia(){
 		currMedia++;
 	}
 	free(pFonts);
-	/*free(pSurfaces);*/
 	free(pTextures);
 	free(pTexture);
 }
