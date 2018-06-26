@@ -32,10 +32,25 @@ bool clientConnected();
 /*button functions*/
 
 static void clientServerBtnClicked(){
-	stopServer();
-	inputBoxToggleVisibility(pInputBoxes[0]);
-	multiplayerState = CLIENT;
-	SDL_StartTextInput();
+	if(multiplayerState == SERVER){
+		stopServer();
+		inputBoxToggleVisibility(pInputBoxes[0]);
+		multiplayerState = CLIENT;
+		changeButtonTexture(pBtns[0],BUTTON_DEFAULT,IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CLIENT_DEFAULT_MOUSEOVER);
+		changeButtonTexture(pBtns[0],BUTTON_MOUSEOVER,IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_CLIENT_DEFAULT_MOUSEOVER);
+		SDL_StartTextInput();
+	}
+	else{
+		if(!startServer()){
+			SDL_StopTextInput();
+			inputBoxClearTextField(pInputBoxes[0]);
+			inputBoxToggleVisibility(pInputBoxes[0]);
+			multiplayerState = SERVER;
+			changeButtonTexture(pBtns[0],BUTTON_DEFAULT,IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_SERVER_DEFAULT_MOUSEOVER);
+			changeButtonTexture(pBtns[0],BUTTON_MOUSEOVER,IMG_SCENE_MULTIPLAYER_ENGAGING_BTN_SERVER_DEFAULT_MOUSEOVER);
+		}
+	}
+
 }
 
 /*end of button functions*/
@@ -59,12 +74,12 @@ static void init(){
 	pBtns[1] = createButton((SCREEN_WIDTH-300)/2, (SCREEN_HEIGHT-150)/2,IMG_SCENE_MENU_BTN_MULTIPLAYER_DEFAULT,
 			IMG_SCENE_MENU_BTN_MULTIPLAYER_DEFAULT,IMG_SCENE_MENU_BTN_MULTIPLAYER_DEFAULT,NULL);
 	toggleButtonVisibility(pBtns[1]);
-	pInputBoxes[0] = createInputBox(15,292,290,false,FONT_OPENSANS_BOLD,255,255,255,true,IMG_SCENE_MULTIPLAYER_ENGAGING_INPUT_BG);
+	pInputBoxes[0] = createInputBox(15,292,290,true,FONT_OPENSANS_BOLD,255,255,255,true,IMG_SCENE_MULTIPLAYER_ENGAGING_INPUT_BG);
 
 
 	/*end of button and input fields placement*/
-	multiplayerState = SERVER;
-	startServer();
+	multiplayerState = CLIENT;
+	SDL_StartTextInput();
 	wasInitiated = true;
 
 }
@@ -107,6 +122,7 @@ static void handleEvents(SDL_Event *e){
 				pBtns[0]->pFunction = NULL;
 				toggleButtonVisibility(pBtns[1]);
 				inputBoxToggleVisibility(pInputBoxes[0]);
+				currScene->renderScene();
 				printf("Connecting... to %s\n",pInputBoxes[0]->textField);
 				if(!connectToServer(pInputBoxes[0]->textField)){
 					SDL_StopTextInput();
@@ -202,6 +218,7 @@ int startServer(){
 		printf("Nie mozna utworzyc serw socketa\n");
 		return -1;
 	}
+	printf("Udalo sie serwer\n");
 	return 0;
 }
 void stopServer(){
@@ -209,6 +226,8 @@ void stopServer(){
 		SDLNet_TCP_Close(*serverSocket);
 		free(serverSocket);
 		serverSocket = NULL;
+		free(ip);
+		ip = NULL;
 	}
 }
 bool clientConnected(){
@@ -243,7 +262,7 @@ int connectToServer(char* ipAddr){
 		printf("Wystapil blad przy polaczeniu\n");
 		free(socket);
 		free(ip);
-		serverSocket = NULL;
+		socket = NULL;
 		ip = NULL;
 		return -1;
 	}

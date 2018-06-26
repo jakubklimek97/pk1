@@ -5,6 +5,7 @@
  *      Author: klimek
  */
 #include "sceneSingleplayer.h"
+#include "sceneScoreboard.h"
 #include "minmax.h"
 #include "defines.h"
 #include <string.h>
@@ -27,8 +28,11 @@ int lastBotMove = -1;
 int score;
 struct texture *text;
 static bool hasEnded;
+static uint32_t ticks;
+static bool msg;
 void enableUndoButton();
 void disableUndoButton();
+void disableLoadButton();
 /*button functions*/
 static void saveBtnClicked(){
 	FILE* saveFile = fopen("save.dat","wb");
@@ -40,6 +44,10 @@ static void saveBtnClicked(){
 		fwrite((void*)&lastBotMove,sizeof(int),1,saveFile);
 		fwrite((void*)&score,sizeof(int),1,saveFile);
 		fclose(saveFile);
+		msg = true;
+		ticks = SDL_GetTicks();
+		SDL_Color color = {255,0,0,255};
+		createFromText(text, FONT_OPENSANS_BOLD,"Progress has been saved.",color);
 	}
 }
 
@@ -59,7 +67,10 @@ static void undoBtnClicked(){
 static void loadBtnClicked(){
 	FILE* loadedFile = fopen("save.dat","rb");
 	if(loadedFile == NULL){
-		perror("Couldn't load save file");
+		msg = true;
+		ticks = SDL_GetTicks();
+		SDL_Color color = {255,0,0,255};
+		createFromText(text, FONT_OPENSANS_BOLD,"Save file doesn't exist.",color);
 	}
 	else{
 		fread((void*)board,sizeof(char),3,loadedFile);
@@ -68,7 +79,10 @@ static void loadBtnClicked(){
 		fread((void*)&lastPlayerMove,sizeof(int),1,loadedFile);
 		fread((void*)&lastBotMove,sizeof(int),1,loadedFile);
 		if(fread((void*)&score,sizeof(int),1,loadedFile) == 0){
-			perror("Error occured during loading");
+			msg = true;
+			ticks = SDL_GetTicks();
+			SDL_Color color = {255,0,0,255};
+			createFromText(text, FONT_OPENSANS_BOLD,"Error occured during loading.",color);
 		}
 		int index;
 		for(index = 0; index < 9; ++index){
@@ -99,6 +113,9 @@ static void boardClicked(){
 }
 void disableSaveButton(){
 	pBtns[9]->pFunction = NULL;
+}
+void disableLoadButton(){
+	pBtns[11]->pFunction = NULL;
 }
 void disableUndoButton(){
 	pBtns[10]->pFunction = NULL;
@@ -139,6 +156,7 @@ void handleQuad(int processedButton){
 				createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
 				disableUndoButton();
 				disableSaveButton();
+				disableLoadButton();
 			}
 		}
 
@@ -148,6 +166,7 @@ void handleQuad(int processedButton){
 			createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
 			disableUndoButton();
 			disableSaveButton();
+			disableLoadButton();
 		}
 		if(result == OPPONENT){
 			hasEnded = true;
@@ -158,6 +177,7 @@ void handleQuad(int processedButton){
 			createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
 			disableUndoButton();
 			disableSaveButton();
+			disableLoadButton();
 		}
 	}
 }
@@ -196,7 +216,7 @@ static void init(){
 	memset(board,'_',sizeof(char)*9);
 	setupBot(O);
 	score = 1000;
-	srand(time(NULL));
+	msg = false;
 	wasInitiated = true;
 }
 static void unInit(){
@@ -256,6 +276,12 @@ static void renderScene()
 		}
 		if(hasEnded == true){
 			renderTexture(text,(SCREEN_WIDTH-text->width)/2,(SCREEN_HEIGHT-text->height)/2);
+		}
+		else if(msg){
+			renderTexture(text,(SCREEN_WIDTH-text->width)/2,(SCREEN_HEIGHT-text->height)/2);
+			if(SDL_GetTicks() - ticks > 2000){
+				msg = false;
+			}
 		}
 		SDL_RenderPresent(gRenderer);
 }

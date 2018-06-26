@@ -31,6 +31,35 @@ static bool hasEnded;
 static void boardClicked(){
 	wasClicked = true;
 }
+static void checkForEnd(){
+	enum whoWon result = lookForWinner(board);
+			if(result == 0){
+				if(!isEmptyPlace(board)){
+					hasEnded = true;
+					closeSocket();
+					SDL_Color color = {255,0,0,255};
+					createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
+				}
+			}
+
+			if(result == PLAYER){
+				hasEnded = true;
+				closeSocket();
+				SDL_Color color = {255,0,0,255};
+				createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
+
+
+			}
+			if(result == OPPONENT){
+				hasEnded = true;
+				closeSocket();
+				SDL_Color color = {255,0,0,255};
+				char textCstr[64] = { '\0' };
+				sprintf(textCstr,"You won. Press Enter to exit.");
+				createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
+
+			}
+}
 static void handleQuad(int processedButton){
 	if(board[processedButton/3][processedButton%3] == '_'){
 		board[processedButton/3][processedButton%3] = opponent;
@@ -38,33 +67,7 @@ static void handleQuad(int processedButton){
 		changeButtonTexture(pBtns[processedButton], BUTTON_MOUSEOVER, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_MOUSEOVER:IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER));
 		sendMessage(processedButton);
 		state = state == SERVER? CLIENT : SERVER;
-		enum whoWon result = lookForWinner(board);
-		if(result == 0){
-			if(!isEmptyPlace(board)){
-				hasEnded = true;
-				closeSocket();
-				SDL_Color color = {255,0,0,255};
-				createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
-			}
-		}
-
-		if(result == PLAYER){
-			hasEnded = true;
-			closeSocket();
-			SDL_Color color = {255,0,0,255};
-			createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
-
-
-		}
-		if(result == OPPONENT){
-			hasEnded = true;
-			closeSocket();
-			SDL_Color color = {255,0,0,255};
-			char textCstr[64] = { '\0' };
-			sprintf(textCstr,"You won. Press Enter to exit.");
-			createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
-
-		}
+		checkForEnd();
 	}
 }
 /*end of button functions*/
@@ -142,6 +145,7 @@ static void handleEvents(SDL_Event *e){
 					changeButtonTexture(pBtns[(int)data], BUTTON_DEFAULT, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_DEFAULT:IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT));
 					changeButtonTexture(pBtns[(int)data], BUTTON_MOUSEOVER, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER :IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_MOUSEOVER));
 					state = state == SERVER? CLIENT : SERVER;
+					checkForEnd();
 					break;
 				}
 				case 9: printf("info ze koniec\n");break;
@@ -150,7 +154,12 @@ static void handleEvents(SDL_Event *e){
 				}
 			}
 			else{
-				printf("Koniec polaczenia\n");
+				hasEnded = true;
+				closeSocket();
+				SDL_Color color = {255,0,0,255};
+				char textCstr[64] = { '\0' };
+				sprintf(textCstr,"Other side disconnected. Press Enter to exit.");
+				createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
 			}
 		}
 	}

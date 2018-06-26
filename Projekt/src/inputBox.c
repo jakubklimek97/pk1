@@ -68,6 +68,7 @@ void inputBoxToggleVisibility(struct inputBox* pInputBox){
 }
 void inputBoxClearTextField(struct inputBox* pInputBox){
 	memset(pInputBox->textField,0,sizeof(char)*pInputBox->textFieldSize);
+	pInputBox->textField[0] = ' ';
 	pInputBox->charsWritten = 0;
 	pInputBox->updateNeeded = true;
 }
