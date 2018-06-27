@@ -29,36 +29,34 @@ static void boardClicked(){
 	wasClicked = true;
 }
 /*koniec funkcji przyciskow*/
+
+/*Funkcja konczy gre i wypisuje wiadomosc na ekranie. Parametry:
+ * message - ciag znakow zawierajacy wiadomosc
+ */
+static void printEndMessage(const char* message){
+	hasEnded = true; /*Koniec gry */
+	SDL_Color color = {255,0,0,255}; /*Kolor napisu */
+	createFromText(text, FONT_OPENSANS_BOLD,message,color); /*Utworzenie tekstury*/
+}
 /*Funkcja sprawdza, czy nastapil koniec potyczki */
 static void checkForEnd(){
 	/*poszukaj zwyciezcy*/
 	enum whoWon result = lookForWinner(board);
 			if(result == 0){ /*jezeli takiego nie ma*/
 				if(!isEmptyPlace(board)){ /*jezeli na planszy nie ma wolnego miejsca, nastapil remis*/
-					hasEnded = true;
 					closeSocket(); /*zamknij polaczenie*/
-					/*utworz teksture z komunikatem*/
-					SDL_Color color = {255,0,0,255};
-					createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
+					printEndMessage("Draw. Press Enter to exit."); /*Zakoncz gre i wypisz komunikat*/
 				}
 			}
 			/*jezeli wygrala druga strona*/
 			if(result == PLAYER){
-				hasEnded = true;
 				closeSocket();
-				SDL_Color color = {255,0,0,255};
-				createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
-
-
+				printEndMessage("You lost. Press Enter to exit.");
 			}
 			/*jezeli wygral gracz*/
 			if(result == OPPONENT){
-				hasEnded = true;
 				closeSocket();
-				SDL_Color color = {255,0,0,255};
-				char textCstr[64] = { '\0' };
-				sprintf(textCstr,"You won. Press Enter to exit.");
-				createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
+				printEndMessage("You won. Press Enter to exit.");
 			}
 }
 /*obsluga przycisku po nacisnieciu go*/
@@ -117,7 +115,44 @@ static void unInit(){/*funkcja omowiona w sceneMenu.c */
 	free(pInputBoxes);
 	destroyTexture(text); /*usun teksture */
 }
-
+/*Funkcja obsluguje odebrana paczke danych*/
+static void handleIncomingData(char data){
+	switch(data){
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:{ /*wiadomosci 0-8 oznaczaja klikniete numery pol */
+				board[data/3][data%3] = player; /*analogicznie do klikniecia gracza, ale tym razem przeciwnik */
+				changeButtonTexture(pBtns[(int)data], BUTTON_DEFAULT, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_DEFAULT:IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT));
+				changeButtonTexture(pBtns[(int)data], BUTTON_MOUSEOVER, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER :IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_MOUSEOVER));
+				state = state == SERVER? CLIENT : SERVER;
+				checkForEnd();
+				break;
+			}
+			default: break;
+			}
+}
+/*Funkcja obsluguje polaczenie ze zdalnym graczem (przetwarza informacje otrzymane od niego)*/
+static void handleRemotePlayer(){
+	if(isActiveSocket()){ /*jezeli w sockecie znajduja sie jakies informacje */
+		char data;
+		/*jezeli przeczytano cala informacje (w przeciwnym wypadku moglo dojsc
+		 * do problemow z druga strona albo druga strona zdecydowala sie zakonczyc gre)*/
+		if(SDLNet_TCP_Recv(*getSocket(),&data,sizeof(char)) == sizeof(char)){
+			handleIncomingData(data);
+		}
+		else{
+			/*polaczenie jest bledne albo druga strona sie rozlaczyla */
+			closeSocket(); /*zamknij polaczenie */
+			printEndMessage("Other side disconnected. Press Enter to exit."); /*Zakoncz gre i wyswietl wiadomosc*/
+		}
+	}
+}
 static void handleEvents(SDL_Event *e){/*funkcja omowiona w sceneMenu.c */
 	if(!wasInitiated){
 		init();
@@ -128,42 +163,7 @@ static void handleEvents(SDL_Event *e){/*funkcja omowiona w sceneMenu.c */
 	}
 	/*jezeli gra sie nie zakonczyla i teraz jest tura zdalnego uzytkownika */
 	if(hasEnded == false && getClientState() != state){
-		if(isActiveSocket()){ /*jezeli w sockecie znajduja sie jakies informacje */
-			char data;
-			/*jezeli przeczytano cala informacje (w przeciwnym wypadku moglo dojsc
-			 * do problemow z druga strona albo druga strona zdecydowala sie zakonczyc gre)*/
-			if(SDLNet_TCP_Recv(*getSocket(),&data,sizeof(char)) == sizeof(char)){
-				switch(data){
-				case 0:
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-				case 5:
-				case 6:
-				case 7:
-				case 8:{ /*wiadomosci 0-8 oznaczaja klikniete numery pol */
-					board[data/3][data%3] = player; /*analogicznie do klikniecia gracza, ale tym razem przeciwnik */
-					changeButtonTexture(pBtns[(int)data], BUTTON_DEFAULT, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_DEFAULT:IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT));
-					changeButtonTexture(pBtns[(int)data], BUTTON_MOUSEOVER, (getClientState() == SERVER ? IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER :IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_MOUSEOVER));
-					state = state == SERVER? CLIENT : SERVER;
-					checkForEnd();
-					break;
-				}
-				default: break;
-				}
-			}
-			else{
-				/*polaczenie jest bledne albo druga strona sie rozlaczyla */
-				hasEnded = true; /*zakoncz gre*/
-				closeSocket(); /*zamknij polaczenie */
-				/*ustaw wiadomosc do uzytkownika*/
-				SDL_Color color = {255,0,0,255};
-				char textCstr[64] = { '\0' };
-				sprintf(textCstr,"Other side disconnected. Press Enter to exit.");
-				createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
-			}
-		}
+		handleRemotePlayer();
 	}
 	if(hasEnded && e->type == SDL_KEYDOWN && (e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym == SDLK_RETURN2)){
 		selectScene(MAIN_MENU); /*jezeli gra sie zakonczyla i uzytkownik wykonal polecenie na ekranie*/

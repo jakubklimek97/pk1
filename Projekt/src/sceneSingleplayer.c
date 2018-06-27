@@ -17,18 +17,27 @@ static int btnCount = 12;
 static int inputBoxCount = 0;
 
 static bool wasClicked = false;
-int lastPlayerMove = -1;
-int lastBotMove = -1;
-int score;
+static int lastPlayerMove = -1;
+static int lastBotMove = -1;
+static int score;
 struct texture *text;
 static bool hasEnded;
 static uint32_t ticks;
 static bool msg; /*czy wiadomosc oczekuje na wyswietlenie*/
 
 /*Ponizsze trzy funkcje wlaczaja/wylaczaja przyciski*/
-void enableUndoButton();
-void disableUndoButton();
-void disableLoadButton();
+static void enableUndoButton();
+static void disableUndoButton();
+static void disableLoadButton();
+/*Funkcja przygotowywuje wiadomosc do wyswietlenia. Parametry:
+ * text - tekstura, na ktorej wiadomosc ma byc wypisana
+ * msg - ciag znakow reprezentujacy wiadomosc
+ * */
+static void printMessage(struct texture *text,const char* msg){
+	SDL_Color color = {255,0,0,255};
+	createFromText(text, FONT_OPENSANS_BOLD,msg,color);
+	ticks = SDL_GetTicks();
+}
 /*Funkcje przyciskow*/
 static void saveBtnClicked(){
 	/*odczyt pliku do zmiennej*/
@@ -42,9 +51,7 @@ static void saveBtnClicked(){
 		fwrite((void*)&score,sizeof(int),1,saveFile);
 		fclose(saveFile);
 		msg = true; /*Pojawi sie wiadomosc*/
-		ticks = SDL_GetTicks(); /*trwajaca 2sekundy od teraz*/
-		SDL_Color color = {255,0,0,255};
-		createFromText(text, FONT_OPENSANS_BOLD,"Progress has been saved.",color);
+		printMessage(text,"Progress has been saved.");
 	}
 }
 
@@ -63,33 +70,10 @@ static void undoBtnClicked(){
 	score -= 40/difficulty(0);/*odejmij punkty za cofniecie*/
 	disableUndoButton();/*wylaczenie przycisku do cofania*/
 }
-static void loadBtnClicked(){
-	FILE* loadedFile = fopen("save.dat","rb");
-	if(loadedFile == NULL){
-		/*jezeli plik nie istnieje, wypisz odpowiednia wiadomosc*/
-		msg = true;
-		ticks = SDL_GetTicks();
-		SDL_Color color = {255,0,0,255};
-		createFromText(text, FONT_OPENSANS_BOLD,"Save file doesn't exist.",color);
-	}
-	else{
-		/*odczyt pliku*/
-		fread((void*)board,sizeof(char),3,loadedFile);
-		fread((void*)(board+1),sizeof(char),3,loadedFile);
-		fread((void*)(board+2),sizeof(char),3,loadedFile);
-		fread((void*)&lastPlayerMove,sizeof(int),1,loadedFile);
-		fread((void*)&lastBotMove,sizeof(int),1,loadedFile);
-		if(fread((void*)&score,sizeof(int),1,loadedFile) == 0){
-			/*jezeli nie udalo sie wszystkiego odczytac wypisz odpowiednia wiadomosc*/
-			msg = true;
-			ticks = SDL_GetTicks();
-			SDL_Color color = {255,0,0,255};
-			createFromText(text, FONT_OPENSANS_BOLD,"Error occured during loading.",color);
-		}
-		/*ustaw tekstury planszy na odpowiadajace ustawieniu planszy*/
-		int index;
-		for(index = 0; index < 9; ++index){
-			switch(board[index/3][index%3]){
+static void refreshBoardTextures(){
+	int index;
+	for(index = 0; index < 9; ++index){
+		switch(board[index/3][index%3]){
 			case '_': break;
 			case 'x':{
 				changeButtonTexture(pBtns[index], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT);
@@ -101,9 +85,30 @@ static void loadBtnClicked(){
 				changeButtonTexture(pBtns[index], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER);
 				break;
 			}
-			}
-
 		}
+	}
+}
+static void loadBtnClicked(){
+	FILE* loadedFile = fopen("save.dat","rb");
+	if(loadedFile == NULL){
+		/*jezeli plik nie istnieje, wypisz odpowiednia wiadomosc*/
+		msg = true;
+		printMessage(text,"Save file doesn't exist.");
+	}
+	else{
+		/*odczyt pliku*/
+		fread((void*)board,sizeof(char),3,loadedFile);
+		fread((void*)(board+1),sizeof(char),3,loadedFile);
+		fread((void*)(board+2),sizeof(char),3,loadedFile);
+		fread((void*)&lastPlayerMove,sizeof(int),1,loadedFile);
+		fread((void*)&lastBotMove,sizeof(int),1,loadedFile);
+		if(fread((void*)&score,sizeof(int),1,loadedFile) == 0){
+			/*jezeli nie udalo sie wszystkiego odczytac wypisz odpowiednia wiadomosc*/
+			msg = true;
+			printMessage(text,"Error occured during loading.");
+		}
+		/*ustaw tekstury planszy na odpowiadajace ustawieniu planszy*/
+		refreshBoardTextures();
 		/*jezeli zapis nie zawiera poprzedniego ruchu, zablokuj przycisk do cofania*/
 		if(lastPlayerMove != -1){
 			pBtns[10]->pFunction = &undoBtnClicked;
@@ -115,23 +120,44 @@ static void loadBtnClicked(){
 static void boardClicked(){
 	wasClicked = true;
 }
-void disableSaveButton(){
+static void disableSaveButton(){
 	pBtns[9]->pFunction = NULL;
 }
-void disableLoadButton(){
+static void disableLoadButton(){
 	pBtns[11]->pFunction = NULL;
 }
-void disableUndoButton(){
+static void disableUndoButton(){
 	pBtns[10]->pFunction = NULL;
 	changeButtonTexture(pBtns[10], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_UNACTIVE);
 	changeButtonTexture(pBtns[10], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_UNACTIVE);
 }
-void enableUndoButton(){
+static void enableUndoButton(){
 	pBtns[10]->pFunction = &undoBtnClicked;
 	changeButtonTexture(pBtns[10], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_ACTIVE);
 	changeButtonTexture(pBtns[10], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_UNDOMOVE_MOUSEOVER);
 }
-void handleQuad(int processedButton){/*obsluga wcisnietego przycisku*/
+static void disableAllFunctionButtons(){
+	disableUndoButton();
+	disableSaveButton();
+	disableLoadButton();
+}
+
+static void makeAIMove(){
+	/*sprawdz, czy w tej chwili bot "ma ochote" wykonac ruch bedacy w interesie gracza*/
+	int generated = SDL_GetTicks()%5;
+	if(generated > difficulty(0)){
+		setupBot(X); /*"Bot udaje gracza */
+	}
+	struct minMax_Move nextMove = findBestMove(board); /*znajdz najlepszy dostepny ruch i wykonaj go (analogicznie do gracza)*/
+	board[nextMove.row][nextMove.col] = generated > difficulty(0) ? opponent:player;
+	changeButtonTexture(pBtns[nextMove.row*3+nextMove.col], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_DEFAULT);
+	changeButtonTexture(pBtns[nextMove.row*3+nextMove.col], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER);
+	lastBotMove = nextMove.row*3+nextMove.col; /*ostatni ruch bota*/
+	if(generated > difficulty(0)){
+		setupBot(O); /*"Bot znowu jest botem */
+	}
+}
+static void handleQuad(int processedButton){/*obsluga wcisnietego przycisku*/
 	if(board[processedButton/3][processedButton%3] == '_'){ /*jezeli pole jest puste*/
 		board[processedButton/3][processedButton%3] = opponent;/*wstaw tam znak gracza, i zmien tekstury pola*/
 		changeButtonTexture(pBtns[processedButton], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CROSS_DEFAULT);
@@ -140,52 +166,32 @@ void handleQuad(int processedButton){/*obsluga wcisnietego przycisku*/
 		enum whoWon result = lookForWinner(board);/*sprawdz, czy gracz dzieki temu wygral*/
 		if(result == 0){/*jezeli nie ma zwyciezcy*/
 			if(isEmptyPlace(board)){/*i istnieje wolne miejsce*/
-				/*sprawdz, czy w tej chwili bot "ma ochote" wykonac ruch bedacy w interesie gracza*/
-				int generated = SDL_GetTicks()%5;
-				if(generated > difficulty(0)){
-					setupBot(X);
-				}
-				struct minMax_Move nextMove = findBestMove(board); /*znajdz najlepszy dostepny ruch i wykonaj go (analogicznie do gracza)*/
-				board[nextMove.row][nextMove.col] = generated > difficulty(0) ? opponent:player;
-				changeButtonTexture(pBtns[nextMove.row*3+nextMove.col], BUTTON_DEFAULT, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_DEFAULT);
-				changeButtonTexture(pBtns[nextMove.row*3+nextMove.col], BUTTON_MOUSEOVER, IMG_SCENE_SINGLEPLAYER_BTN_BOARD_CIRCLE_MOUSEOVER);
-				lastBotMove = nextMove.row*3+nextMove.col; /*ostatni ruch bota*/
+				makeAIMove();
 				enableUndoButton();/*skoro mamy ostatnie ruchy, mozemy je cofnac*/
-				if(generated > difficulty(0)){
-					setupBot(O);
-				}
 				result = lookForWinner(board);/*sprawdz, czy dalej nie ma zwyciezcy*/
 			}else{
 				/*jezeli nie ma miejsca, jest remis. Pzygotuj wiadomosc do wypisania i ustaw flage hasEnded na true*/
 				hasEnded = true;
-				SDL_Color color = {255,0,0,255};
-				createFromText(text, FONT_OPENSANS_BOLD,"Draw. Press Enter to exit.",color);
+				printMessage(text,"Draw. Press Enter to exit.");
 				addScore(0);
-				disableUndoButton();/*koniec gry, nie ma mowy o cofaniu, zapisywaniu badz wczytywaniu*/
-				disableSaveButton();
-				disableLoadButton();
+				disableAllFunctionButtons();/*koniec gry, nie ma mowy o cofaniu, zapisywaniu badz wczytywaniu*/
+
 			}
 		}
 
 		if(result == PLAYER){/*jezeli wygral bot*/
 			hasEnded = true;
-			SDL_Color color = {255,0,0,255};
-			createFromText(text, FONT_OPENSANS_BOLD,"You lost. Press Enter to exit.",color);
+			printMessage(text,"You lost. Press Enter to exit.");
 			addScore(0);
-			disableUndoButton();
-			disableSaveButton();
-			disableLoadButton();
+			disableAllFunctionButtons();
 		}
 		if(result == OPPONENT){/*jezeli wygral gracz*/
 			hasEnded = true;
-			SDL_Color color = {255,0,0,255};
 			char textCstr[64] = { '\0' };
 			sprintf(textCstr,"You won. Your score: %d. Press Enter to exit.",score);
+			printMessage(text,textCstr);
 			addScore(score);/*dodaj wynik do tablicy wynikow*/
-			createFromText(text, FONT_OPENSANS_BOLD,textCstr,color);
-			disableUndoButton();
-			disableSaveButton();
-			disableLoadButton();
+			disableAllFunctionButtons();
 		}
 	}
 }
@@ -224,6 +230,7 @@ static void init(){/*omowione w sceneMenu.c*/
 	memset(board,'_',sizeof(char)*9);/*wyzeruj plansze*/
 	setupBot(O); /*bot gra kolkiem*/
 	score = 1000;/*poczatkowy wynik*/
+	lastBotMove = lastPlayerMove = -1; /*Nie bylo wczesniej ruchu*/
 	msg = false;/*nie ma wiadomosci do wypisania*/
 	wasInitiated = true;
 }

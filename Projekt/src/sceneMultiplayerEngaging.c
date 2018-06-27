@@ -98,7 +98,38 @@ static void unInit(){/*Funkcja opisana w sceneMenu.c*/
 
 }
 
-
+static void handleClientEvents(SDL_Event *e){
+	if(e->type == SDL_KEYDOWN){
+		if(e->key.keysym.sym == SDLK_BACKSPACE){ /*jezeli nacisnieto backspace, usun znak z pola tekstowego*/
+			inputBoxPopCharacter(pInputBoxes[0]);
+		}
+		/*jezeli nacisnieto enter, nalezy wykonac probe polaczenia*/
+		else if(e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym ==SDLK_RETURN2 ) {
+			/*zablokuj mozliwosc zmiany w serwer, pokaz komunikat o zmianie, ukryj okno do wpisywania*/
+			pBtns[0]->pFunction = NULL;
+			toggleButtonVisibility(pBtns[1]);
+			inputBoxToggleVisibility(pInputBoxes[0]);
+			currScene->renderScene();/*wyrenderuj poczynione zmiany*/
+			/*jezeli udalo sie polaczyc, zablokuj mozliwosc wpisywania znakow i zmien scene*/
+			if(!connectToServer(pInputBoxes[0]->textField)){
+				SDL_StopTextInput();
+				selectScene(MULTIPLAYER);
+			}
+			else{/*w przeciwnym wypadku wracamy do punktu wyjscia*/
+				toggleButtonVisibility(pBtns[1]);
+				inputBoxToggleVisibility(pInputBoxes[0]);
+				pBtns[0]->pFunction = &clientServerBtnClicked;
+				SDL_StartTextInput();
+			}
+		}
+	}
+	/*nie usuwamy znaku, nie probujemy wykonac polaczenia,
+	 * wiec jezeli uzytkownik wpisuje znak, dodajemy go do pola tekstowego
+	 */
+	else if(e->type == SDL_TEXTINPUT){
+		inputBoxAppendChar(pInputBoxes[0],e->text.text[0]);
+	}
+}
 static void handleEvents(SDL_Event *e){/*Funkcja opisana w sceneMenu.c*/
 
 	if(!wasInitiated){
@@ -109,36 +140,7 @@ static void handleEvents(SDL_Event *e){/*Funkcja opisana w sceneMenu.c*/
 		return;
 	}
 	if(multiplayerState == CLIENT){ /*jezeli klient*/
-		if(e->type == SDL_KEYDOWN){
-			if(e->key.keysym.sym == SDLK_BACKSPACE){ /*jezeli nacisnieto backspace, usun znak z pola tekstowego*/
-				inputBoxPopCharacter(pInputBoxes[0]);
-			}
-			/*jezeli nacisnieto enter, nalezy wykonac probe polaczenia*/
-			else if(e->key.keysym.sym == SDLK_RETURN || e->key.keysym.sym ==SDLK_RETURN2 ) {
-				/*zablokuj mozliwosc zmiany w serwer, pokaz komunikat o zmianie, ukryj okno do wpisywania*/
-				pBtns[0]->pFunction = NULL;
-				toggleButtonVisibility(pBtns[1]);
-				inputBoxToggleVisibility(pInputBoxes[0]);
-				currScene->renderScene();/*wyrenderuj poczynione zmiany*/
-				/*jezeli udalo sie polaczyc, zablokuj mozliwosc wpisywania znakow i zmien scene*/
-				if(!connectToServer(pInputBoxes[0]->textField)){
-					SDL_StopTextInput();
-					selectScene(MULTIPLAYER);
-				}
-				else{/*w przeciwnym wypadku wracamy do punktu wyjscia*/
-					toggleButtonVisibility(pBtns[1]);
-					inputBoxToggleVisibility(pInputBoxes[0]);
-					pBtns[0]->pFunction = &clientServerBtnClicked;
-					SDL_StartTextInput();
-				}
-			}
-		}
-		/*nie usuwamy znaku, nie probujemy wykonac polaczenia,
-		 * wiec jezeli uzytkownik wpisuje znak, dodajemy go do pola tekstowego
-		 */
-		else if(e->type == SDL_TEXTINPUT){
-			inputBoxAppendChar(pInputBoxes[0],e->text.text[0]);
-		}
+		handleClientEvents(e);
 	}
 	else{/*jezeli jestesmy serwerem*/
 		if(serverSocket == NULL){
