@@ -99,6 +99,7 @@ void zamknij(){
 }
 
 int run(){
+
 	if(inicjalizacja() == false){
 		perror("Nie udalo sie zinicjalizowac.\n");
 	}

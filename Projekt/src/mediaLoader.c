@@ -12,67 +12,63 @@
 #define FONT_SIZE 28
 
 bool loadMedia(){
-	pTextures = NULL;
-	pTexture = NULL;
+	pTextureList = NULL;
 	bool success = true;
 	if(MEDIA_COUNT > 0){
-		pTextures = malloc(MEDIA_COUNT*sizeof(SDL_Texture*));
-		pTexture = malloc(MEDIA_COUNT*sizeof(struct texture*));
-		SDL_Surface* pTmpSur; /*aby utworzyc teksture potrzebny jest najpierw obiekt SDL_Surface*/
+		SDL_Surface* pTmpSur;/*Tymczasowa powierzchnia*/
 		int currMedia = 0;
 		while(currMedia < MEDIA_COUNT){
+			/*zaladuj tymczasowa powierzchnie*/
 			pTmpSur = IMG_Load(mediaLocations[currMedia]);
 			if(pTmpSur == NULL){
 				printf("Nie mozna zaladowac obrazu: %s %s\n", mediaLocations[currMedia],IMG_GetError());
 				success = false;
 			}
 			else {
-				pTextures[currMedia] = SDL_CreateTextureFromSurface(getRenderer(),pTmpSur); /*utworzenie tekstury*/
-				pTexture[currMedia] = (struct texture*)malloc(sizeof(struct texture));
-				pTexture[currMedia]->height = pTmpSur->h;
-				pTexture[currMedia]->width = pTmpSur->w;
-				pTexture[currMedia]->lTexture = SDL_CreateTextureFromSurface(getRenderer(),pTmpSur);/*po raz drugi, zeby dwie tablice byly niezalezne*/
-				if(pTexture[currMedia]->lTexture == NULL){
+				/*Utworz element na teksture*/
+				struct textureList* ptr = listAddTexture(pTextureList,currMedia,malloc(sizeof(struct texture)));
+				ptr->pElement->height =pTmpSur->h;
+				ptr->pElement->width = pTmpSur->w;
+				ptr->pElement->lTexture = SDL_CreateTextureFromSurface(getRenderer(),pTmpSur);/*utworz teksture z powierzchni */
+				if(ptr->pElement->lTexture == NULL){/*jezeli nie udalo sie*/
 					printf("Nie mozna zaladowac tekstury: %s Blad: %s\n", mediaLocations[currMedia],SDL_GetError());
 					success = false;
 				}
-
+				if(currMedia == 0) pTextureList = ptr;/*pierwsza tekstura bedzie glowa listy*/
 			}
-
-			SDL_FreeSurface(pTmpSur);
+			SDL_FreeSurface(pTmpSur);/*to juz nie jest potrzebne*/
 			++currMedia;
 		}
 		pFonts = malloc(FONT_COUNT*sizeof(TTF_Font*));
 		while(currMedia-MEDIA_COUNT < FONT_COUNT){
-			pFonts[currMedia-MEDIA_COUNT] = TTF_OpenFont(mediaLocations[currMedia],FONT_SIZE);
-			if(pFonts[currMedia-MEDIA_COUNT] == NULL){
+			pFonts[currMedia-MEDIA_COUNT] = TTF_OpenFont(mediaLocations[currMedia],FONT_SIZE);/*Odczyt czcionki*/
+			if(pFonts[currMedia-MEDIA_COUNT] == NULL){/*Jezeli nie udalo sie przypisac czcionki*/
 				printf("Nie mozna zaladowac czcionki %s %s\n", mediaLocations[currMedia],TTF_GetError());
 				success = false;
 			}
 			++currMedia;
 		}
 	}
-	return success;
+	return success;/*Nie bylo bledow, wiec sukces*/
 }
+
 SDL_Texture* getTexture(int mediaNumber){
-	return pTexture[mediaNumber]->lTexture;
+	return listGetTexture(pTextureList, mediaNumber)->lTexture;
+}
+struct texture* getTextureStr(int mediaNumber){
+	return listGetTexture(pTextureList,mediaNumber);
 }
 TTF_Font* getFont(int fontNumber){
 	return pFonts[fontNumber];
 }
 void unloadMedia(){
-	int currMedia = 0;
-	while(currMedia < MEDIA_COUNT){
-		SDL_DestroyTexture(pTextures[currMedia]);
-		SDL_DestroyTexture(pTexture[currMedia]->lTexture);
-		free(pTexture[currMedia]);
-		currMedia++;
-	}
+	int currMedia = MEDIA_COUNT;
 	while(currMedia-MEDIA_COUNT < FONT_COUNT){
-		TTF_CloseFont(pFonts[currMedia-MEDIA_COUNT]);
+		TTF_CloseFont(pFonts[currMedia-MEDIA_COUNT]);/*Zwolnij czcionki*/
 		currMedia++;
 	}
-	free(pFonts);
-	free(pTextures);
-	free(pTexture);
+	free(pFonts);/*Zwolnij miejsce na wskazniki na czcionki*/
+	freeList(pTextureList);/*zwolnij liste tekstur*/
 }
+
+

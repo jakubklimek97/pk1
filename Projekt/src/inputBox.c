@@ -25,7 +25,7 @@ struct inputBox* createInputBox(size_t textFieldSize, int x, int y, bool isVisib
 	pTmp->color.g = g;
 	pTmp->color.b= b;
 	if(addBackground == true){
-		pTmp->backgroundTexture = pTexture[defaultTexture];
+		pTmp->backgroundTexture = getTextureStr(defaultTexture);
 	}
 	else{
 		pTmp->backgroundTexture = NULL;

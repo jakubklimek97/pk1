@@ -13,10 +13,9 @@
 #include <stdlib.h>
 #include "bool.h"
 #include "texture.h"
-/*tablice wskaznikow na tekstury (2 typy - wlasny + sdl'owski */
-struct texture** pTexture;
-SDL_Texture** pTextures;
-
+#include "textureList.h"
+/*lista jednokierunkowa na tekstury */
+struct textureList* pTextureList;
 /*tablica wskaznikow na czcionki */
 TTF_Font** pFonts;
 
@@ -29,6 +28,11 @@ bool loadMedia();
  */
 SDL_Texture* getTexture(int mediaNumber);
 
+/*Funkcja zwraca wskaznik na strukture texture o podanej nazwie. Parametry:
+ * mediaNumber - nazwa tekstury
+ */
+struct texture* getTextureStr(int mediaNumber);
+
 /*Funkcja zwraca wskaznik na czcionke o podanej nazwie. Parametry:
  * fontNumber - nazwa czcionki
  */
@@ -37,5 +41,6 @@ TTF_Font* getFont(int fontNumber);
 /*Funkcja usuwa z pamieci wszystkie elementy, ktore zostaly zaladowane przez funkcje loadMedia()
 */
 void unloadMedia();
+
 
 #endif /* MEDIALOADER_H_ */
