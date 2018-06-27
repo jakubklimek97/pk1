@@ -261,6 +261,7 @@ static int connectToServer(char* ipAddr){
 		ip = NULL;
 		return -1;
 	}
+	free(ip);/*Juz nie potrzebne*/
 	/*utworzenie zbioru socketow do obslugi polaczenia*/
 	if(socketSet == NULL)
 		socketSet = malloc(sizeof(SDLNet_SocketSet));
